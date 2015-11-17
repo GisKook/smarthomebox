@@ -1,7 +1,7 @@
-struct termioconf{
+struct termconf{
 	char * portname; 
-	speed_t speed;
-	tcflag_t parity;
+	int speed;
+	int parity;
 };
 
-int openterm(struct termioconf * conf);
+int openterm(struct termconf * conf);
