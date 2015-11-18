@@ -1,6 +1,7 @@
 #include "list.h"
 #include "kfifo.h"
 #include "rbtree.h"
+#include <string.h>
 
 #define CONNSERIALPORT 1
 #define CONNSOCKET 2
@@ -37,10 +38,10 @@ struct freeconnlist{
 };
 
 struct connection * freeconnlist_getconn(){ 
-	if(list_empty(freeconnlisthead)){
+	if(list_empty(&freeconnlisthead)){
 		return connection_create();
 	}else{
-		struct freeconnlist* list_first_entry(&freeconnlisthead, struct freeconnlist, list);
+		struct freeconnlist *freeconnlist = list_first_entry(&freeconnlisthead, struct freeconnlist, list);
 		struct connection * c = freeconnlist->connection;
 		free(freeconnlist);
 		return c;
@@ -73,7 +74,7 @@ struct connection * connrbtree_getconn(int fd){
 		}else if(fd < connnode->connection->fd){
 			node = node->rb_left;
 		}else{
-			return node;
+			return connnode->connection;
 		}
 	}
 
@@ -90,9 +91,9 @@ struct connrbtreenode * _connrbtree_insert(struct connrbtreenode *c){
 		crbn = rb_entry(*newnode, struct connrbtreenode, node);
 		parent = *newnode;
 		
-		if(c->fd < crbn->connection->fd){
+		if(c->connection->fd < crbn->connection->fd){
 			newnode = &((*newnode)->rb_left);
-		}else if(c->fd > crbn->connection->fd){
+		}else if(c->connection->fd > crbn->connection->fd){
 			newnode = &((*newnode)->rb_right);
 		}else{
 			return crbn;
@@ -112,5 +113,5 @@ void connrbtree_insert(struct connection *c){
 
 	if(( ret = _connrbtree_insert(connrbtreenode)))
 		return;
-	rb_insert_color(connrbtreenode->node, &connrbtreeroot);
+	rb_insert_color(&connrbtreenode->node, &connrbtreeroot);
 }
