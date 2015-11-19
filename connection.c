@@ -1,7 +1,8 @@
+#include <string.h>
+#include <stdio.h>
 #include "list.h"
 #include "kfifo.h"
 #include "rbtree.h"
-#include <string.h>
 
 #define CONNSERIALPORT 1
 #define CONNSOCKET 2
@@ -11,6 +12,8 @@ struct connection{
 	int fd;
 	unsigned char type;
 	struct kfifo * rawfifo;
+	struct list_head list;
+	struct rb_node node;
 };
 
 struct connection * connection_create(){
@@ -32,49 +35,36 @@ void connection_init(struct connection * c, int fd, unsigned char type){
 }
 
 static LIST_HEAD(freeconnlisthead);
-struct freeconnlist{
-	struct list_head list;
-	struct connection * connection;
-};
 
 struct connection * freeconnlist_getconn(){ 
 	if(list_empty(&freeconnlisthead)){
 		return connection_create();
 	}else{
-		struct freeconnlist *freeconnlist = list_first_entry(&freeconnlisthead, struct freeconnlist, list);
-		struct connection * c = freeconnlist->connection;
-		free(freeconnlist);
+		struct connection *c = list_first_entry(&freeconnlisthead, struct connection, list);
+		list_del(&c->list);
 		return c;
 	}
 }
 
 void freeconnlist_add(struct connection * c){ 
-	struct freeconnlist * conn = (struct freeconnlist *)malloc(sizeof(struct freeconnlist));
-	memset(conn, 0, sizeof(struct freeconnlist));
-	conn->connection = c;
-	list_add_tail(&conn->list, &freeconnlisthead);
+	list_add_tail(&c->list, &freeconnlisthead);
 }
 
 static struct rb_root connrbtreeroot = RB_ROOT;
-
-struct connrbtreenode{
-	struct rb_node node;
-	struct connection * connection;
-};
 
 struct connection * connrbtree_getconn(int fd){
 	struct rb_root *root = &connrbtreeroot;
 	struct rb_node *node = root->rb_node;
 
-	struct connrbtreenode * connnode;
+	struct connection * c;
 	while(node){
-		connnode = rb_entry(node, struct connrbtreenode, node);
-		if(fd > connnode->connection->fd){
+		c  = rb_entry(node, struct connection, node);
+		if(fd > c->fd){
 			node = node->rb_right;
-		}else if(fd < connnode->connection->fd){
+		}else if(fd < c->fd){
 			node = node->rb_left;
 		}else{
-			return connnode->connection;
+			return c;
 		}
 	}
 
@@ -82,21 +72,22 @@ struct connection * connrbtree_getconn(int fd){
 }
 
 
-struct connrbtreenode * _connrbtree_insert(struct connrbtreenode *c){
+struct connection * _connrbtree_insert(struct connection *c){
 	struct rb_node **newnode = &connrbtreeroot.rb_node, *parent = NULL; 
 
-	struct connrbtreenode * crbn;
+	struct connection * conn;
 
 	while(*newnode){ 
-		crbn = rb_entry(*newnode, struct connrbtreenode, node);
+		conn  = rb_entry(*newnode, struct connection, node);
 		parent = *newnode;
 		
-		if(c->connection->fd < crbn->connection->fd){
+		if(c->fd < conn->fd){
 			newnode = &((*newnode)->rb_left);
-		}else if(c->connection->fd > crbn->connection->fd){
+		}else if(c->fd > conn->fd){
 			newnode = &((*newnode)->rb_right);
 		}else{
-			return crbn;
+			fprintf(stdout, "rbtree alread has the fd \n");
+			return conn;
 		}
 	}
 	rb_link_node(&c->node, parent, newnode);
@@ -105,13 +96,9 @@ struct connrbtreenode * _connrbtree_insert(struct connrbtreenode *c){
 }
 
 void connrbtree_insert(struct connection *c){
-	struct connrbtreenode * connrbtreenode = (struct  connrbtreenode *)malloc(sizeof(struct connrbtreenode));
-	memset(connrbtreenode, 0, sizeof(struct connrbtreenode));
-	connrbtreenode->connection = c;
-	
-	struct connrbtreenode * ret;
+	struct connection * ret;
 
-	if(( ret = _connrbtree_insert(connrbtreenode)))
+	if(( ret = _connrbtree_insert(c)))
 		return;
-	rb_insert_color(&connrbtreenode->node, &connrbtreeroot);
+	rb_insert_color(&c->node, &connrbtreeroot);
 }
