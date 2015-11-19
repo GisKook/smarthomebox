@@ -8,6 +8,7 @@
 
 #include "socket.h"
 #include "connection.h"
+#include "event.h"
 
 #define MAXEVENTS 64
 
@@ -28,7 +29,6 @@ struct eventhub * eventhub_create(struct eventhubconf * conf){
 
 	hub->events = (struct epoll_enent *)calloc(MAXEVENTS, sizeof(struct epoll_event));
 	hub->conf = conf;
-
 
 	hub->epollfd = epoll_crate1(0);
 	if(hub->epollfd == -1){
@@ -51,27 +51,6 @@ void eventhub_register(struct eventhub * hub,int fd){
 	}
 }
 
-void eventhub_accept(int fd){
-	struct connection * c = freeconnlist_getconn();
-	connection_init(c, fd, CONNSOCKET);
-	connrbtree_insert(c);
-}
-
-void eventhub_recvmsg(int fd, unsigned char * buf, int buflen){
-	struct connection * c = connrbtree_getconn(fd);
-	if(c){
-		connection_put(c, buf, buflen);
-	}
-}
-
-void eventhub_close(int fd){
-	struct connection * c = connrbtree_getconn(fd);
-	if(c){ 
-		connrbtree_del(c);
-		freeconnlist_add(c);
-	}
-}
-
 void eventhub_start(struct eventhub * hub){
 	hub->listenfd = create_and_bind(hub->conf->port);
 	make_socket_non_blocking(hub->listenfd);
@@ -91,7 +70,7 @@ void eventhub_start(struct eventhub * hub){
 				   ready for reading (why were we notified then?) */
 				fprintf (stdout, "epoll error\n");
 	 			close (events[i].data.fd);
-				eventhub_close(events[i].data.fd);
+				event_close(events[i].data.fd);
 				continue;
 			} else if (hub->listenfd == events[i].data.fd) {
 				/* We have a notification on the listening socket, which
@@ -129,7 +108,7 @@ void eventhub_start(struct eventhub * hub){
 					ret = make_socket_non_blocking (infd);
 					if (ret == -1)
 						abort ();
-					eventhub_accept(infd);
+					event_accept(infd);
 					eventhub_register(hub, infd);
 				}
 				continue;
@@ -162,7 +141,7 @@ void eventhub_start(struct eventhub * hub){
 						break;
 					} 
 
-					eventhub_recvmsg(events[i].data.fd, buf, count);
+					event_recvmsg(events[i].data.fd, buf, count);
 
 					/* Write the buffer to standard output */
 					ret = write (1, buf, count);
@@ -174,16 +153,14 @@ void eventhub_start(struct eventhub * hub){
 				}
 
 				if (done) {
-					printf ("Closed connection on descriptor %d\n",
-							events[i].data.fd);
+					printf ("Closed connection on descriptor %d\n", events[i].data.fd);
 
 					/* Closing the descriptor will make epoll remove it
 					   from the set of descriptors which are monitored. */
 					close (events[i].data.fd);
-					eventhub_close(events[i].data.fd);
+					event_close(events[i].data.fd);
 				}
 			}
 		}
 	}
-
 }
