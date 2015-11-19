@@ -34,6 +34,10 @@ void connection_init(struct connection * c, int fd, unsigned char type){
 	c->type = type;
 }
 
+void connection_put(struct connection * c, unsigned char * buf, unsigned int buflen){ 
+	kfifo_put(c->rawfifo, buf, buflen);
+}
+
 static LIST_HEAD(freeconnlisthead);
 
 struct connection * freeconnlist_getconn(){ 
@@ -101,4 +105,8 @@ void connrbtree_insert(struct connection *c){
 	if(( ret = _connrbtree_insert(c)))
 		return;
 	rb_insert_color(&c->node, &connrbtreeroot);
+}
+
+void connrbtree_del(struct connection * c){ 
+	rb_erase(&c->node, &connrbtreeroot);
 }
