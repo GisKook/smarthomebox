@@ -66,3 +66,26 @@ create_and_bind (char *port) {
 
 	return sfd;
 }
+
+int openclient(char *port, char *addr) {
+
+	typedef struct sockaddr SA;
+	int sockfd, fd, nbyte;
+	struct sockaddr_in servaddr;
+
+	if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+		fprintf(stdout,"fail to connection to server\n");
+		return -1;
+	}
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = PF_INET;
+	servaddr.sin_port = htons(atoi(port));
+	servaddr.sin_addr.s_addr = inet_addr(addr);
+
+	if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) < 0) {
+		fprintf(stdout, "fail to connect\n");
+	}
+
+	return(sockfd);
+}
