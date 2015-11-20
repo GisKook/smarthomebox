@@ -9,12 +9,9 @@
 #include "socket.h"
 #include "connection.h"
 #include "event.h"
+#include "eventhub.h"
 
 #define MAXEVENTS 64
-
-struct eventhubconf{
-	char port[8];
-};
 
 struct eventhub{
 	struct eventhubconf * conf;
@@ -27,10 +24,10 @@ struct eventhub * eventhub_create(struct eventhubconf * conf){
 	struct eventhub * hub = (struct eventhub *)malloc(sizeof(struct eventhub));
 	memset(hub, 0, sizeof(struct eventhub));
 
-	hub->events = (struct epoll_enent *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+	hub->events = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
 	hub->conf = conf;
 
-	hub->epollfd = epoll_crate1(0);
+	hub->epollfd = epoll_create1(0);
 	if(hub->epollfd == -1){
 		fprintf(stdout, "epoll create fail\n");
 		free(hub->events);
@@ -53,6 +50,9 @@ void eventhub_register(struct eventhub * hub,int fd){
 
 void eventhub_start(struct eventhub * hub){
 	hub->listenfd = create_and_bind(hub->conf->port);
+	if( 0 == listen(hub->listenfd, MAXEVENTS)){
+		fprintf(stdout, "listen :%s\n", hub->conf->port);
+	}
 	make_socket_non_blocking(hub->listenfd);
 	eventhub_register(hub, hub->listenfd);
 	int ret;
@@ -68,7 +68,7 @@ void eventhub_start(struct eventhub * hub){
 			    (!(events[i].events & EPOLLIN))) {
 				/* An error has occured on this fd, or the socket is not
 				   ready for reading (why were we notified then?) */
-				fprintf (stdout, "epoll error\n");
+				fprintf (stdout, "epoll error %s\n", strerror(errno));
 	 			close (events[i].data.fd);
 				event_close(events[i].data.fd);
 				continue;

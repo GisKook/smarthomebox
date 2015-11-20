@@ -1,3 +1,4 @@
+#include "connection.h"
 
 void event_accept(int fd){
 	struct connection * c = freeconnlist_getconn();
