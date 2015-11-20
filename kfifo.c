@@ -121,3 +121,32 @@ unsigned int kfifo_get(struct kfifo *fifo,
 	return len;
 }
 
+/**
+ * __kfifo_get - gets some data from the FIFO, no locking version
+ * @fifo: the fifo to be used.
+ * @buffer: where the data must be copied.
+ * @len: the size of the destination buffer.
+ *
+ * This function copies at most 'len' bytes from the FIFO into the
+ * 'buffer' and returns the number of copied bytes.
+ *
+ * Note that with only one concurrent reader and one concurrent
+ * writer, you don't need extra locking to use these functions.
+ */
+unsigned int kfifo_getahead(struct kfifo *fifo,
+			 unsigned char *buffer, unsigned int len)
+{
+	unsigned int l;
+
+	len = min(len, fifo->in - fifo->out);
+
+	/* first get the data from fifo->out until the end of the buffer */
+	l = min(len, fifo->size - (fifo->out & (fifo->size - 1)));
+	memcpy(buffer, fifo->buffer + (fifo->out & (fifo->size - 1)), l);
+
+	/* then get the rest (if any) from the beginning of the buffer */
+	memcpy(buffer + l, fifo->buffer, len - l);
+
+	return len;
+}
+
