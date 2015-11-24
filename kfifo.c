@@ -121,6 +121,11 @@ unsigned int kfifo_get(struct kfifo *fifo,
 	return len;
 }
 
+unsigned int kfifo_pop(struct kfifo * fifo){
+	if(fifo->in > fifo->fifo->out)
+		fifo->out ++;
+}
+
 /**
  * __kfifo_get - gets some data from the FIFO, no locking version
  * @fifo: the fifo to be used.

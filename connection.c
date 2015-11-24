@@ -38,6 +38,18 @@ void connection_put(struct connection * c, unsigned char * buf, unsigned int buf
 	kfifo_put(c->rawfifo, buf, buflen);
 }
 
+unsigned int connection_readbuf_getlen(struct connection *c){
+	return kfifo_len(c->rawfifo);
+}	
+
+int connection_readbuf_getahead(struct connection *c, unsigned char * buf, unsigned int buflen){
+	return kfifo_getahead(c->rawfifo, buf, buflen);
+}
+
+void connection_readbuf_pop(struct connection *c){ 
+	kfifo_pop(c->rawfifo);
+}
+
 static LIST_HEAD(freeconnlisthead);
 
 struct connection * freeconnlist_getconn(){ 

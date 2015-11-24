@@ -38,6 +38,9 @@ extern unsigned int kfifo_get(struct kfifo *fifo,
 
 extern unsigned int kfifo_getahead(struct kfifo *fifo,
 			 unsigned char *buffer, unsigned int len);
+
+unsigned int kfifo_pop(struct kfifo * fifo);
+
 /**
  * __kfifo_reset - removes the entire FIFO contents, no locking version
  * @fifo: the fifo to be emptied.
