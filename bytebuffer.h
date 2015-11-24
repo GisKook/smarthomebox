@@ -56,7 +56,25 @@ static inline unsigned short bytebuffer_getword(unsigned char * value){
 	((unsigned char *)&result)[0] = value[0];
 	((unsigned char *)&result)[1] = value[1];
 	if (!ISBIGENDIAN){
-		result = swap16(result);
+		return swap16(result);
+	}
+
+	return result;
+}
+
+static inline unsigned long long bytebuffer_getquadword(unsigned char * value){
+	unsigned long long result = 0;
+
+	((unsigned char *)&result)[0] = value[0];
+	((unsigned char *)&result)[1] = value[1];
+	((unsigned char *)&result)[2] = value[2];
+	((unsigned char *)&result)[3] = value[3];
+	((unsigned char *)&result)[4] = value[4];
+	((unsigned char *)&result)[5] = value[5];
+	((unsigned char *)&result)[6] = value[6];
+	((unsigned char *)&result)[7] = value[7];
+	if (!ISBIGENDIAN){
+		result = swap64(result);
 	}
 
 	return result;

@@ -122,7 +122,7 @@ unsigned int kfifo_get(struct kfifo *fifo,
 }
 
 unsigned int kfifo_pop(struct kfifo * fifo){
-	if(fifo->in > fifo->fifo->out)
+	if(fifo->in > fifo->out)
 		fifo->out ++;
 }
 

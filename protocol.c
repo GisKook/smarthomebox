@@ -1,8 +1,7 @@
 #include "connection.h"
 #include "bytebuffer.h"
+#include "protocol.h"
 
-#define ILLEGAL  0
-#define HALFPACK 255
 
 unsigned char protocol_checksum(unsigned char * buf, unsigned int buflen){
 	unsigned char temp = buf[0];
@@ -23,7 +22,7 @@ int protocol_check(struct connection * c, unsigned short * messageid){
 		connection_readbuf_pop(c);
 		protocol_check(c, &tmp);
 	}else if(len > 2){ 
-		unsigned short messagelen=bytebuffer_getword(buf);
+		unsigned short messagelen=bytebuffer_getword(&buf[1]);
 		if(messagelen < 8 || messagelen > 2048){
 			connection_readbuf_pop(c);
 			protocol_check(c,&tmp);
@@ -32,7 +31,7 @@ int protocol_check(struct connection * c, unsigned short * messageid){
 			*messageid= HALFPACK;
 			return 0;
 		}else{
-			unsigned char checksum = protocol_checksum(buf, messagelen);
+			unsigned char checksum = protocol_checksum(buf, messagelen-2);
 			if(checksum == buf[messagelen - 2] && buf[messagelen - 1] == 0xCE){ 
 				unsigned short cmdid = bytebuffer_getword(&buf[3]);
 				*messageid = cmdid;

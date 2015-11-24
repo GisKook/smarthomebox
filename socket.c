@@ -67,8 +67,7 @@ create_and_bind (char *port) {
 	return sfd;
 }
 
-int openclient(char *port, char *addr) {
-
+int openclient(char *addr, char *port) {
 	typedef struct sockaddr SA;
 	int sockfd, fd, nbyte;
 	struct sockaddr_in servaddr;
@@ -86,6 +85,8 @@ int openclient(char *port, char *addr) {
 	if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) < 0) {
 		fprintf(stdout, "fail to connect\n");
 	}
+
+	make_socket_non_blocking(sockfd);
 
 	return(sockfd);
 }
