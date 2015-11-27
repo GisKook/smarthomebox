@@ -9,11 +9,11 @@ typedef void (*sighandler_t)(int);
 
 void checkstatus(int i){ 
 	struct list_head * head = connlist_get();
-	if(list_empty(head)){
-	fprintf(stdout, "empty \n");
+	if(connlist_checkserver()){
+	fprintf(stdout, "have server\n");
 	}else{
 	
-	fprintf(stdout, "check \n");
+	fprintf(stdout, "no server\n");
 	}
 }
 

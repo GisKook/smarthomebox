@@ -19,7 +19,7 @@ int main(){
 	memcpy(&hubconf.port, LISTENPORT, sizeof(LISTENPORT));
 	struct eventhub * hub = eventhub_create(&hubconf);
 
-	int fd = openclient(SERVERADDR, SERVERPORTSE);
+	int fd = openclient(SERVERADDR, SERVERPORT);
 	struct connection * serverconn = freeconnlist_getconn();
 	connection_init(serverconn, fd, CONNSOCKESERVER);
 	eventhub_register(hub, fd);

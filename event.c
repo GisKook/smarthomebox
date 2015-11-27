@@ -5,7 +5,7 @@
 
 void event_accept(int fd){
 	struct connection * c = freeconnlist_getconn();
-	connection_init(c, fd, CONNSOCKET);
+	connection_init(c, fd, CONNSOCKETCLIENT);
 	connrbtree_insert(c);
 }
 

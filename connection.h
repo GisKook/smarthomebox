@@ -16,6 +16,7 @@ struct connection * freeconnlist_getconn();
 void freeconnlist_add(struct connection * c); 
 
 struct list_head * connlist_get();
+int connlist_checkserver(); 
 
 struct connection * connrbtree_getconn(int fd);
 void connrbtree_insert(struct connection *c);

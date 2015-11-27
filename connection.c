@@ -73,6 +73,18 @@ struct list_head * connlist_get(){
 	return &connlisthead;
 }
 
+int connlist_checkserver(){ 
+	struct list_head * pos, *n;
+	list_for_each_safe(pos, n, &connlisthead){
+		struct connection * c = list_entry(pos, struct connection, list);
+		if(c->type == CONNSOCKESERVER){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 struct connection * connrbtree_getconn(int fd){
 	struct rb_root *root = &connrbtreeroot;
 	struct rb_node *node = root->rb_node;
