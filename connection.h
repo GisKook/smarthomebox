@@ -1,6 +1,9 @@
 
+#include "list.h"
+
 #define CONNSERIALPORT 1
-#define CONNSOCKET 2
+#define CONNSOCKETCLIENT 2
+#define CONNSOCKESERVER 3
 struct connection;
 
 void connection_init(struct connection * c, int fd, unsigned char type);
@@ -11,6 +14,8 @@ void connection_readbuf_pop(struct connection *c);
 
 struct connection * freeconnlist_getconn(); 
 void freeconnlist_add(struct connection * c); 
+
+struct list_head * connlist_get();
 
 struct connection * connrbtree_getconn(int fd);
 void connrbtree_insert(struct connection *c);

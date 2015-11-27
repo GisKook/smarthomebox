@@ -1,11 +1,9 @@
 #include <string.h>
 #include <stdio.h>
-#include "list.h"
 #include "kfifo.h"
 #include "rbtree.h"
+#include "connection.h"
 
-#define CONNSERIALPORT 1
-#define CONNSOCKET 2
 #define MAXBUFLEN 1024
 
 struct connection{
@@ -20,6 +18,7 @@ struct connection * connection_create(){
 	struct connection * conn = (struct connection*) malloc(sizeof(struct connection));
 	memset(conn, 0, sizeof(struct connection));
 	conn->rawfifo = kfifo_init(1024);
+	INIT_LIST_HEAD(&conn->list);
 
 	return conn;
 }
@@ -58,6 +57,7 @@ struct connection * freeconnlist_getconn(){
 	}else{
 		struct connection *c = list_first_entry(&freeconnlisthead, struct connection, list);
 		list_del(&c->list);
+		INIT_LIST_HEAD(&c->list);
 		return c;
 	}
 }
@@ -67,6 +67,11 @@ void freeconnlist_add(struct connection * c){
 }
 
 static struct rb_root connrbtreeroot = RB_ROOT;
+static LIST_HEAD(connlisthead);
+
+struct list_head * connlist_get(){
+	return &connlisthead;
+}
 
 struct connection * connrbtree_getconn(int fd){
 	struct rb_root *root = &connrbtreeroot;
@@ -102,7 +107,7 @@ struct connection * _connrbtree_insert(struct connection *c){
 		}else if(c->fd > conn->fd){
 			newnode = &((*newnode)->rb_right);
 		}else{
-			fprintf(stdout, "rbtree alread has the fd \n");
+			fprintf(stdout, "!!!(((rbtree alread has the fd \n");
 			return conn;
 		}
 	}
@@ -117,8 +122,12 @@ void connrbtree_insert(struct connection *c){
 	if(( ret = _connrbtree_insert(c)))
 		return;
 	rb_insert_color(&c->node, &connrbtreeroot);
+	list_add_tail(&c->list, &connlisthead);
+
 }
 
 void connrbtree_del(struct connection * c){ 
 	rb_erase(&c->node, &connrbtreeroot);
+	list_del(&c->list);
+	freeconnlist_add(c);
 }

@@ -44,13 +44,13 @@ static inline void bytebuffer_readquadword(const unsigned char ** s, unsigned lo
 	*s+=8;
 }
 
-static inline void bytebuffer_readbytes( const unsigned char * s, char * str, int len){
+static inline void bytebuffer_readbytes( const unsigned char ** s, char * str, int len){
 	int i;
 	for(i = 0; i < len; i++) {
-		str[i] = ((unsigned char *)*s)[i];
+		str[i] = ((char *)*s)[i];
 	}
 
-	s += len;
+	*s += len;
 }
 
 static inline unsigned short bytebuffer_getword(unsigned char * value){
