@@ -141,15 +141,10 @@ void eventhub_start(struct eventhub * hub){
 						break;
 					} 
 
-					event_recvmsg(hub, events[i].data.fd, buf, count);
-
-					/* Write the buffer to standard output */
-					ret = write (1, buf, count);
-					if (ret == -1)
-					{
-						perror ("write");
-						abort ();
+					if(!done){
+						event_recvmsg(hub, events[i].data.fd, buf, count);
 					}
+
 				}
 
 				if (done) {

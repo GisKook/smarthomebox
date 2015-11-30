@@ -26,7 +26,8 @@ void checkstatus(int i){
 	}else{ 
 		for(;;){
 			int n = write(s_timer->wfd,"A",1);
-			if(n < 0){ 
+			if(n < 0 && errno == EAGAIN){ 
+				continue;
 				fprintf(stdout, "%s\n", strerror(errno));
 			}
 			break;
