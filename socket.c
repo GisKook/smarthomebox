@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "connection.h"
+#include "ceconf.h"
 
 int
 make_socket_non_blocking (int sfd) {
@@ -89,4 +91,35 @@ int openclient(char *addr, char *port) {
 	make_socket_non_blocking(sockfd);
 
 	return(sockfd);
+}
+
+struct connection * connectserver(){
+	int fd = openclient(ceconf_getserveraddr(), ceconf_getserverport());
+	struct connection * serverconn = NULL;
+	if(fd != -1){
+		serverconn = freeconnlist_getconn();
+		connection_init(serverconn, fd, CONNSOCKETSERVER);
+		connrbtree_insert(serverconn);
+	}
+
+	return serverconn;
+}
+
+
+struct connection * createpipe(int * wfd){
+	int fdsig[2];
+	if(pipe2(fdsig,O_CLOEXEC | O_NONBLOCK) == -1){
+		fprintf(stderr,"create pipe error.%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+		*wfd = -1;
+
+		return NULL;
+	}
+
+	*wfd = fdsig[1];
+
+	struct connection * conn = freeconnlist_getconn();
+	connection_init(conn, fdsig[0], CONNSOCKETCMD);
+	connrbtree_insert(conn);
+
+	return conn;
 }

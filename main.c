@@ -4,26 +4,34 @@
 #include "connection.h"
 #include "toolkit.h"
 #include "cetimer.h"
-
-
-#define LISTENPORT "8989"
-#define SERVERADDR "192.168.8.42"
-#define SERVERPORT "8990"
+#include "socket.h"
+#include "ceconf.h"
+#include "connection.h"
 
 int main(){ 
 	unsigned long long mac = toolkit_getmac();
 	fprintf(stdout, "%llu\n", mac);
-	struct cetimer * timer = cetimer_create(10, 1);
-	cetimer_start(timer);
-	struct eventhubconf hubconf;
-	memcpy(&hubconf.port, LISTENPORT, sizeof(LISTENPORT));
-	struct eventhub * hub = eventhub_create(&hubconf);
+	// create pipe
+	int wfd;
+	struct connection * readconn = createpipe(&wfd);
 
-	int fd = openclient(SERVERADDR, SERVERPORT);
-	struct connection * serverconn = freeconnlist_getconn();
-	connection_init(serverconn, fd, CONNSOCKESERVER);
-	eventhub_register(hub, fd);
-	connrbtree_insert(serverconn);
+	// create timer
+	struct cetimer * timer = cetimer_create(10, 1, wfd);
+	cetimer_start(timer);
+
+	// create eventhub 
+	struct eventhubconf hubconf;
+	memset(&hubconf, 0, sizeof(struct eventhubconf));
+	memcpy(&hubconf.port, ceconf_getlistenport(),strlen(ceconf_getlistenport())); 
+	struct eventhub * hub = eventhub_create(&hubconf);
+	// connection to server
+	struct connection * serverconn = connectserver();
+	if(serverconn){
+		eventhub_register(hub,connection_getfd(serverconn));
+	}
+	if(readconn){
+		eventhub_register(hub, connection_getfd(readconn));
+	}
 
 	eventhub_start(hub);
 }

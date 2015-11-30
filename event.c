@@ -2,6 +2,7 @@
 #include "connection.h"
 #include "protocol.h"
 #include "toolkit.h"
+#include "eventhub.h" 
 
 void event_accept(int fd){
 	struct connection * c = freeconnlist_getconn();
@@ -9,15 +10,19 @@ void event_accept(int fd){
 	connrbtree_insert(c);
 }
 
-void event_recvmsg(int fd, unsigned char * buf, int buflen){
+void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int buflen){
 	fprintf(stdout, "IN ");
 	toolkit_printbytes(buf, buflen);
 	struct connection * c = connrbtree_getconn(fd);
-	if(c){
+	if(c && c->type == CONNSOCKETCMD){ 
+
+	}else if(c && (c->type == CONNSOCKETCLIENT || c->type == CONNSOCKETSERVER)){
 		connection_put(c, buf, buflen); 
 		unsigned short messageid = 0;
 		int messagelen = protocol_check(c, &messageid);
 		fprintf(stdout, "recv %d\n", messageid);
+		char buffer[1024] = {0};
+		connection_get(c,buffer, messagelen);
 		switch(messageid){
 			case LOGINFEEDBACK:
 			case HEARTFEEDBACK:

@@ -37,6 +37,10 @@ void connection_put(struct connection * c, unsigned char * buf, unsigned int buf
 	kfifo_put(c->rawfifo, buf, buflen);
 }
 
+unsigned int connetcion_get(struct connetcion * c, char * buffer, unsigned int msglen){
+	return kfifo_get(c->rawfifo, buffer, msglen);
+}
+
 unsigned int connection_readbuf_getlen(struct connection *c){
 	return kfifo_len(c->rawfifo);
 }	
@@ -47,6 +51,14 @@ int connection_readbuf_getahead(struct connection *c, unsigned char * buf, unsig
 
 void connection_readbuf_pop(struct connection *c){ 
 	kfifo_pop(c->rawfifo);
+}
+
+int connection_getfd(struct connection * c){
+	return c->fd;
+}
+
+unsigned char connection_gettype(struct connection * c){
+	return c->type;
 }
 
 static LIST_HEAD(freeconnlisthead);
@@ -77,7 +89,7 @@ int connlist_checkserver(){
 	struct list_head * pos, *n;
 	list_for_each_safe(pos, n, &connlisthead){
 		struct connection * c = list_entry(pos, struct connection, list);
-		if(c->type == CONNSOCKESERVER){
+		if(c->type == CONNSOCKETSERVER){
 			return 1;
 		}
 	}
