@@ -14,9 +14,9 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 	fprintf(stdout, "IN ");
 	toolkit_printbytes(buf, buflen);
 	struct connection * c = connrbtree_getconn(fd);
-	if(c && c->type == CONNSOCKETCMD){ 
-
-	}else if(c && (c->type == CONNSOCKETCLIENT || c->type == CONNSOCKETSERVER)){
+	if(c && connection_gettype(c) == CONNSOCKETCMD){ 
+		fprintf(stdout, "recv %s\n", buf);
+	}else if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER)){
 		connection_put(c, buf, buflen); 
 		unsigned short messageid = 0;
 		int messagelen = protocol_check(c, &messageid);

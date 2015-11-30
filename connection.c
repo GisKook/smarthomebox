@@ -37,7 +37,7 @@ void connection_put(struct connection * c, unsigned char * buf, unsigned int buf
 	kfifo_put(c->rawfifo, buf, buflen);
 }
 
-unsigned int connetcion_get(struct connetcion * c, char * buffer, unsigned int msglen){
+unsigned int connection_get(struct connection * c, char * buffer, unsigned int msglen){
 	return kfifo_get(c->rawfifo, buffer, msglen);
 }
 

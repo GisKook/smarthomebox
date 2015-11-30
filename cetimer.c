@@ -3,7 +3,10 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 #include "connection.h"
+
 
 typedef void (*sighandler_t)(int);
 struct cetimer{ 
@@ -20,8 +23,14 @@ void checkstatus(int i){
 	struct list_head * head = connlist_get();
 	if(connlist_checkserver()){
 		fprintf(stdout, "have server %d\n", s_timer->wfd);
-	}else{
-		
+	}else{ 
+		for(;;){
+			int n = write(s_timer->wfd,"A",1);
+			if(n < 0){ 
+				fprintf(stdout, "%s\n", strerror(errno));
+			}
+			break;
+		}
 	}
 }
 
