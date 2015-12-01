@@ -17,6 +17,11 @@ unsigned char protocol_checksum(unsigned char * buf, unsigned int buflen){
 int protocol_check(struct connection * c, unsigned short * messageid){ 
 	unsigned char buf[BUFLEN] = {0};
 	unsigned int len = connection_readbuf_getahead(c, buf, BUFLEN);
+	if(len == 0){
+		messageid = ILLEGAL;
+
+		return 0;
+	}
 	unsigned short tmp;
 	if(buf[0] != 0xCE){ 
 		connection_readbuf_pop(c);

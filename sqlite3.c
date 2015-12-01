@@ -38,7 +38,7 @@ void sqlitedb_close_table(struct sqlitedb * sdb)
 }
 
 
-void sqlitedb_insert_record(struct sqlitedb *sdb,char * table,int DID,int  CID,char * name,char *end)
+void sqlitedb_insert_record(struct sqlitedb *sdb,char * table,int DID,int CID,char * name,char *end)
 {
 	char * sql;
 	char * zErrMsg = NULL;

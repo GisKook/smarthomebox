@@ -134,7 +134,7 @@ void eventhub_start(struct eventhub * hub){
 							done = 1;
 						}
 						break;
-					} else if (count == 0) {
+					} else if (count == 0 && 0) {
 						/* End of file. The remote has closed the
 						   connection. */
 						done = 1;

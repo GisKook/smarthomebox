@@ -7,6 +7,15 @@
 #include <termios.h>
 #include <string.h>
 #include "termcontrol.h"
+#include "connection.h"
+#include "ceconf.h"
+
+struct termconf{
+	char * portname; 
+	int speed;
+	int parity;
+};
+
 
 void
 set_blocking (int fd, int should_block)
@@ -67,15 +76,29 @@ int set_term_attribs(int fd, struct termconf * conf){
 	return 0;
 }
 
-int openterm(struct termconf * conf){ 
+struct connection * openterm(struct termconf * conf){
 	int fd = open(conf->portname, O_RDWR | O_NOCTTY | O_SYNC);
 	if (fd < 0){
 		fprintf(stdout, "error %d opending %s: %s\n", errno, conf->portname, strerror(errno));
+		return NULL;
 	}
 	set_term_attribs(fd, conf);
-	set_blocking(fd, 1);
+	set_blocking(fd, 0);
+	make_socket_non_blocking(fd);
 
-	return fd;
+	struct connection * conn = freeconnlist_getconn();
+	connection_init(conn, fd, CONNSERIALPORT);
+	connrbtree_insert(conn);
+
+	return conn;
 }
 
 
+struct connection * connserialport(){
+	struct termconf conf;
+	conf.portname = ceconf_getserialport();
+	conf.speed = ceconf_getspeed();
+	conf.parity = ceconf_getparity();
+
+	return openterm(&conf);
+}

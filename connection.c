@@ -68,8 +68,10 @@ struct connection * freeconnlist_getconn(){
 		return connection_create();
 	}else{
 		struct connection *c = list_first_entry(&freeconnlisthead, struct connection, list);
+		kfifo_reset(c->rawfifo);
 		list_del(&c->list);
 		INIT_LIST_HEAD(&c->list);
+		
 		return c;
 	}
 }
@@ -85,11 +87,11 @@ struct list_head * connlist_get(){
 	return &connlisthead;
 }
 
-int connlist_checkserver(){ 
+int connlist_check(unsigned char conntype){ 
 	struct list_head * pos, *n;
 	list_for_each_safe(pos, n, &connlisthead){
 		struct connection * c = list_entry(pos, struct connection, list);
-		if(c->type == CONNSOCKETSERVER){
+		if(c->type == conntype){
 			return 1;
 		}
 	}

@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <string.h>
 #include "connection.h"
-
+#include "cetimer.h"
 
 typedef void (*sighandler_t)(int);
 struct cetimer{ 
@@ -19,19 +19,46 @@ struct cetimer{
 
 static struct cetimer * s_timer = NULL;
 
-void checkstatus(int i){ 
+void reconnect(unsigned char conntype){
 	struct list_head * head = connlist_get();
-	if(connlist_checkserver()){
-		fprintf(stdout, "have server %d\n", s_timer->wfd);
-	}else{ 
+	int n = 0;
+	if(!connlist_check(conntype)){
 		for(;;){
-			int n = write(s_timer->wfd,"A",1);
-			if(n < 0 && errno == EAGAIN){ 
-				continue;
+			if(conntype == CONNSOCKETSERVER){
+				n = write(s_timer->wfd,CERECONNSOCKET,1);
+			}else if(conntype == CONNSERIALPORT){
+				n = write(s_timer->wfd, CERECONNSERIAL, 1);
+			}
+
+			if(n < 0){ 
 				fprintf(stdout, "%s\n", strerror(errno));
 			}
 			break;
 		}
+	}
+}
+
+void checkstatus(int i){ 
+	struct list_head * head = connlist_get();
+	if(!connlist_check(CONNSOCKETSERVER)){
+		for(;;){
+			int n = write(s_timer->wfd,CERECONNSOCKET,1);
+			if(n < 0){ 
+				fprintf(stdout, "%s\n", strerror(errno));
+			}
+			break;
+		}
+	}
+	
+	if(!connlist_check(CONNSERIALPORT)){
+		for(;;){
+			int n = write(s_timer->wfd,CERECONNSERIAL,1);
+			if(n < 0){ 
+				fprintf(stdout, "%s\n", strerror(errno));
+			}
+			break;
+		}
+
 	}
 }
 

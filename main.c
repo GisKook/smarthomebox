@@ -7,6 +7,7 @@
 #include "socket.h"
 #include "ceconf.h"
 #include "connection.h"
+#include "termcontrol.h"
 
 int main(){ 
 	unsigned long long mac = toolkit_getmac();
@@ -31,6 +32,11 @@ int main(){
 	}
 	if(readconn){
 		eventhub_register(hub, connection_getfd(readconn));
+	}
+	// conn to serial port
+	struct connection * connserial = connserialport();
+	if(connserial){ 
+		eventhub_register(hub, connection_getfd(connserial));
 	}
 
 	eventhub_start(hub);
