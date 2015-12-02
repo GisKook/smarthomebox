@@ -64,10 +64,31 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 				break;
 		}
 	}else if(c && connection_gettype(c) == CONNSERIALPORT){
-		fprintf(stdout, "serial \n");
-		getchar();
-		fprintf(stdout, "serial2 \n");
-		
+		connection_put(c, buf, buflen);
+		unsigned short messageid = 0;	
+		int messagelen = znpframe_check(c, &messageid);
+		char buffer[1024] = {0};
+		connection_get(c, buffer, messagelen);
+		switch(messageid){
+			case  AFINCOMINGDATA:
+				break;
+			case ZDOSTATECHANGE:
+				break;
+			case SYSRESETIND:
+				break;
+			case ZBWRITERSP:
+				break;
+			case AFREGISTERRSP:
+				break;
+			case ZDOSTARTUPRSP:
+				break;
+			case AFDATAREQRSP:
+				break;
+			case ILLEGAL:
+				break;
+			default:
+				printf("unrecognized serial messageid\r\n");
+		}		
 	}
 }
 
