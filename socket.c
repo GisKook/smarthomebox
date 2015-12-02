@@ -86,6 +86,9 @@ int openclient(char *addr, char *port) {
 
 	if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) < 0) {
 		fprintf(stdout, "fail to connect\n");
+		close(sockfd);
+
+		return -1;
 	}
 
 	make_socket_non_blocking(sockfd);

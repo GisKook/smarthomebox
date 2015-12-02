@@ -13,18 +13,29 @@ void event_accept(int fd){
 	connrbtree_insert(c);
 }
 
+int _check_command(unsigned char * buffer, int buflen, unsigned char command){
+	int i = 0;
+	for(; i < buflen; i++){
+		if(buffer[i] == command){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int buflen){
 	fprintf(stdout, "IN ");
 	toolkit_printbytes(buf, buflen);
 	struct connection * c = connrbtree_getconn(fd);
 	if(c && connection_gettype(c) == CONNSOCKETCMD){ 
-		if(buf[0] == CERECONNSOCKET[0]){
+		if( _check_command(buf, buflen, CERECONNSOCKET[0])){
 			struct connection * serverconn = connectserver();
 			if(serverconn){
 				eventhub_register(hub,connection_getfd(serverconn));
 			}
 		}
-		if(buf[0] == CERECONNSERIAL[0]){
+		if( _check_command(buf, buflen, CERECONNSERIAL[0])){
 			struct connection * connserial = connserialport();
 
 			if(connserial){

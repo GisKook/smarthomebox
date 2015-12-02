@@ -133,7 +133,7 @@ struct connection * _connrbtree_insert(struct connection *c){
 		}else if(c->fd > conn->fd){
 			newnode = &((*newnode)->rb_right);
 		}else{
-			fprintf(stdout, "!!!(((rbtree alread has the fd \n");
+			fprintf(stdout, "!!!(((rbtree alread has the fd  %d\n", c->fd);
 			return conn;
 		}
 	}
