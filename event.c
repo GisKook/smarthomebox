@@ -4,6 +4,8 @@
 #include "toolkit.h"
 #include "eventhub.h" 
 #include "cetimer.h"
+#include "socket.h"
+#include "termcontrol.h" 
 
 void event_accept(int fd){
 	struct connection * c = freeconnlist_getconn();
