@@ -51,6 +51,9 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 				break;
 		}
 	}else if(c && connection_gettype(c) == CONNSERIALPORT){
+		fprintf(stdout, "serial \n");
+		getchar();
+		fprintf(stdout, "serial2 \n");
 		
 	}
 }

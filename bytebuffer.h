@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include "endianness.h"
 
 static inline void bytebuffer_readbyte(const unsigned char** s, unsigned char* d){
@@ -50,6 +52,32 @@ static inline void bytebuffer_readbytes( const unsigned char ** s, char * str, i
 		str[i] = ((char *)*s)[i];
 	}
 
+	*s += len;
+}
+
+static inline void bytebuffer_writebyte( unsigned char **s, unsigned char d){
+	(*((unsigned char *)*s)) = d;
+	(*s)++;
+}
+
+static inline void bytebuffer_writeword( unsigned char **s, unsigned short d){
+	*((unsigned short *)(*s)) = ISBIGENDIAN?d:swap16(d);
+	*s += 2;
+}
+
+static inline void bytebuffer_writedword( unsigned char **s, unsigned int d){
+	*((unsigned int *)(*s)) = ISBIGENDIAN?d:swap32(d);
+	*s += 4;
+}
+
+static inline void bytebuffer_writequadword( unsigned char **s, unsigned long long d){
+	(*((unsigned long long *)(*s))) = ISBIGENDIAN?d:swap64(d);
+	*s += 8;
+}
+
+static inline void bytebuffer_writebytes( unsigned char **s, unsigned char * d, unsigned int len){
+	int i = 0;
+	memcpy(*s, d, len);
 	*s += len;
 }
 
