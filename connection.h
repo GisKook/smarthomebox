@@ -16,12 +16,14 @@ int connection_readbuf_getahead(struct connection *c, unsigned char * buf, unsig
 void connection_readbuf_pop(struct connection *c);
 int connection_getfd(struct connection * c);
 unsigned char connection_gettype(struct connection * c);
+void connection_close(struct connection * c);
 
 struct connection * freeconnlist_getconn(); 
 void freeconnlist_add(struct connection * c); 
 
 struct list_head * connlist_get();
 int connlist_check(unsigned char conntype); 
+void connlist_checkstatus(long timestamp);
 
 struct connection * connrbtree_getconn(int fd);
 void connrbtree_insert(struct connection *c);

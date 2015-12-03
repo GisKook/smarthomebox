@@ -7,6 +7,8 @@ static struct ceconf{
 	char * serialport;
 	int speed;
 	int parity;
+
+	int timeout;
 }s_conf = {
 	"8989",
 	"192.168.8.42",
@@ -14,6 +16,7 @@ static struct ceconf{
 	"/dev/tnt0",
 	115200,
 	0,
+	60,
 };
 
 char * ceconf_getlistenport(){
@@ -38,4 +41,8 @@ int ceconf_getspeed(){
 
 int ceconf_getparity(){
 	return s_conf.parity;
+}
+
+int ceconf_gettimeout(){
+	return s_conf.timeout;
 }

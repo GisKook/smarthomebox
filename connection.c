@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 #include "kfifo.h"
 #include "rbtree.h"
 #include "connection.h"
@@ -12,6 +13,7 @@ struct connection{
 	struct kfifo * rawfifo;
 	struct list_head list;
 	struct rb_node node;
+	time_t timestamp;
 };
 
 struct connection * connection_create(){
@@ -19,6 +21,7 @@ struct connection * connection_create(){
 	memset(conn, 0, sizeof(struct connection));
 	conn->rawfifo = kfifo_init(1024);
 	INIT_LIST_HEAD(&conn->list);
+	conn->timestamp = time(NULL);
 
 	return conn;
 }
@@ -61,6 +64,12 @@ unsigned char connection_gettype(struct connection * c){
 	return c->type;
 }
 
+void connection_close(struct connection * c){
+	close(c->fd);
+	connrbtree_del(c); 
+	freeconnlist_add(c);
+}
+
 static LIST_HEAD(freeconnlisthead);
 
 struct connection * freeconnlist_getconn(){ 
@@ -71,6 +80,7 @@ struct connection * freeconnlist_getconn(){
 		kfifo_reset(c->rawfifo);
 		list_del(&c->list);
 		INIT_LIST_HEAD(&c->list);
+		c->timestamp = time(NULL);
 		
 		return c;
 	}
@@ -81,6 +91,7 @@ void freeconnlist_add(struct connection * c){
 }
 
 static struct rb_root connrbtreeroot = RB_ROOT;
+
 static LIST_HEAD(connlisthead);
 
 struct list_head * connlist_get(){
@@ -97,6 +108,17 @@ int connlist_check(unsigned char conntype){
 	}
 
 	return 0;
+}
+
+void connlist_checkstatus(long timestamp){
+	struct list_head * pos, *n;
+	list_for_each_safe(pos, n, &connlisthead){
+		struct connection * c = list_entry(pos, struct connection, list);
+		if((c->type == CONNSOCKETSERVER || c->type == CONNSOCKETCLIENT) && 
+				timestamp - c->timestamp > ceconf_gettimeout()){
+			connection_close(c);
+		}
+	}
 }
 
 struct connection * connrbtree_getconn(int fd){

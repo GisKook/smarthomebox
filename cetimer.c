@@ -59,7 +59,9 @@ void checkstatus(int i){
 			break;
 		}
 
-	}
+	} 
+	time_t t = time(NULL);
+	connlist_checkstatus(t);
 }
 
 struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd){
