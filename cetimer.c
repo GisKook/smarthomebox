@@ -18,6 +18,7 @@ struct cetimer{
 };
 
 static struct cetimer * s_timer = NULL;
+//static struct cetimer * heart_timer
 
 void reconnect(unsigned char conntype){
 	struct list_head * head = connlist_get();
@@ -61,8 +62,23 @@ void checkstatus(int i){
 
 	} 
 	time_t t = time(NULL);
+         if(t%60==0){
+                  for(;;){
+                          int n = write(s_timer->wfd,HEARTBEAT,1);
+                          if(n < 0){
+                                  fprintf(stdout, "%s\n", strerror(errno));
+                          }
+                          break;
+                  }
+  
+          }
+
+
+
 	connlist_checkstatus(t);
 }
+
+ 
 
 struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd){
 	if(s_timer == NULL){
@@ -80,6 +96,29 @@ struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, i
 
 	return s_timer;
 }
+/*
+struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd){
+        if(heart_timer == NULL){
+                struct cetimer * timer = (struct cetimer *)malloc(sizeof(struct cetimer));
+                timer->tnexttime.tv_sec = nextvalue;
+                timer->tinterval.tv_sec = interval;
+                timer->timer.it_interval = timer->tinterval;
+                timer->timer.it_value = timer->tnexttime;
+                setitimer(ITIMER_VIRTUAL, &timer->timer, 0);
+                timer->handler = ;
+                timer->wfd = wfd;
+  
+                heart_timer = timer;
+          }
+  
+          return heart_timer;
+  }
+
+void cetimer_start(struct cetimer * timer){
+         signal(SIGVTALRM, timer->handler);
+}
+*/
+
 
 void cetimer_start(struct cetimer * timer){
 	signal(SIGALRM, timer->handler);

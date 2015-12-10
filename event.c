@@ -42,6 +42,27 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 				eventhub_register(hub, connection_getfd(connserial));
 			}
 		}
+		if( _check_command(buf, buflen, HEARTBEAT[0])){
+
+			unsigned char heart_buf[255];
+			unsigned int hbuflen;
+			
+			hbuflen = encodeheart(gateway , heat_buf);
+			struct list_head *pos, *n;
+			list_for_each_safe(pos, n, &connlisthead){
+				struct connection * c = list_entry(pos, struct connection, list);
+				if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER))
+				{
+					for(;;){
+						int n = write(c->fd,heart_buf,hbuflen);
+						if(n < 0){
+							fprintf(stdout, "%s\n", strerror(errno));
+						}
+						break;
+					}
+				}
+			}
+		}
 	}else if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER)){
 		connection_put(c, buf, buflen); 
 		unsigned short messageid = 0;

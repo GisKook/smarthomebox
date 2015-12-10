@@ -46,6 +46,7 @@ int protocol_check(struct connection * c, unsigned short * messageid){
 				protocol_check(c, &tmp); 
 			}
 		}
+ 
 
 	}else{
 		*messageid = HALFPACK;
