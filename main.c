@@ -9,6 +9,8 @@
 #include "connection.h"
 #include "termcontrol.h"
 
+struct eventhub * g_hub;
+
 int main(){ 
 	unsigned long long mac = toolkit_getmac();
 	fprintf(stdout, "%llu\n", mac);
@@ -25,19 +27,20 @@ int main(){
 	memset(&hubconf, 0, sizeof(struct eventhubconf));
 	memcpy(&hubconf.port, ceconf_getlistenport(),strlen(ceconf_getlistenport())); 
 	struct eventhub * hub = eventhub_create(&hubconf);
+	g_hub = hub;
 	// connection to server
-	struct connection * serverconn = connectserver();
-	if(serverconn){
-		eventhub_register(hub,connection_getfd(serverconn));
-	}
+//	struct connection * serverconn = connectserver();
+//	if(serverconn){
+//		eventhub_register(hub,connection_getfd(serverconn));
+//	}
 	if(readconn){
 		eventhub_register(hub, connection_getfd(readconn));
 	}
 	// conn to serial port
-	struct connection * connserial = connserialport();
-	if(connserial){ 
-		eventhub_register(hub, connection_getfd(connserial));
-	}
+//	struct connection * connserial = connserialport();
+//	if(connserial){ 
+//		eventhub_register(hub, connection_getfd(connserial));
+//	}
 
 	eventhub_start(hub);
 }

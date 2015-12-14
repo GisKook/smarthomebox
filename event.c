@@ -19,17 +19,6 @@ void event_accept(int fd){
 	connrbtree_insert(c);
 }
 
-int _check_command(unsigned char * buffer, int buflen, unsigned char command){
-	int i = 0;
-	for(; i < buflen; i++){
-		if(buffer[i] == command){
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 void event_reconnect(struct eventhub * hub){
 	struct list_head * head = connlist_get();
 	if(!connlist_check(CONNSOCKETSERVER)){
@@ -44,8 +33,17 @@ void event_reconnect(struct eventhub * hub){
 			eventhub_register(hub,connection_getfd(serialconn));
 		}
 	}
-	time_t t = time(NULL);
-	connlist_checkstatus(t);
+}
+
+int _check_command(unsigned char * buffer, int buflen, unsigned char command){
+	int i = 0;
+	for(; i < buflen; i++){
+		if(buffer[i] == command){
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int buflen){
@@ -54,7 +52,8 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 	struct connection * c = connrbtree_getconn(fd);
 	if(c && connection_gettype(c) == CONNSOCKETCMD){ 
 		if( _check_command(buf, buflen, CECHECK[0])){
-			event_reconnect(hub);
+			time_t t = time(NULL);
+			connlist_checkstatus(t);
 		}
 		if( _check_command(buf, buflen, HEARTBEAT[0])){
 

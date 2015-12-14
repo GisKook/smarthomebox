@@ -122,7 +122,8 @@ struct connection * createpipe(int * wfd){
 		return NULL;
 	}
 
-	*wfd = fdsig[1];
+	*wfd = fdsig[1]; 
+	make_socket_non_blocking(fdsig[0]);
 
 	struct connection * conn = freeconnlist_getconn();
 	connection_init(conn, fdsig[0], CONNSOCKETCMD);
