@@ -132,6 +132,21 @@ struct connection * createpipe(int * wfd){
 	return conn;
 }
 
+int createpipe2(int *wfd){
+	int fdsig[2];
+	if(pipe2(fdsig,O_CLOEXEC | O_NONBLOCK) == -1){
+		fprintf(stderr,"create pipe error.%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+		*wfd = -1;
+
+		return -1;
+	}
+
+	*wfd = fdsig[1]; 
+	make_socket_non_blocking(fdsig[0]);
+
+	return fdsig[0];
+}
+
 int sendnonblocking(int fd, char * buf, int buflen){ 
 	int n;
 	for(;;){

@@ -18,19 +18,21 @@ struct cetimer{
 	struct timeval tnexttime;
 	struct timeval tinterval;
 	int wfd;
+	int reconnwfd;
 };
 
 static struct cetimer * s_timer = NULL;
 
 void checkstatus(int i){ 
 	sendnonblocking(s_timer->wfd, CECHECK, 1);
+	sendnonblocking(s_timer->reconnwfd, CERECONN, 1);
 	time_t t = time(NULL);
 	if(t%60==0){
 		sendnonblocking(s_timer->wfd, HEARTBEAT, 1);
 	}
 }
 
-struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd){
+struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd, int reconnwfd){
 	if(s_timer == NULL){
 		struct cetimer * timer = (struct cetimer *)malloc(sizeof(struct cetimer));
 		timer->tnexttime.tv_sec = nextvalue;
@@ -39,7 +41,10 @@ struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, i
 		timer->timer.it_value = timer->tnexttime;
 		setitimer(ITIMER_REAL, &timer->timer, 0);
 		timer->handler = checkstatus;
+		make_socket_non_blocking(wfd);
 		timer->wfd = wfd;
+		make_socket_non_blocking(reconnwfd);
+		timer->reconnwfd = reconnwfd;
 
 		s_timer = timer;
 	}

@@ -122,7 +122,7 @@ void eventhub_start(struct eventhub * hub){
 
 				for(;;) {
 					ssize_t count;
-					char buf[512];
+					char buf[1024];
 
 					count = read (events[i].data.fd, buf, sizeof buf);
 					if (count == -1) {

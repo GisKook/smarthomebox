@@ -19,21 +19,6 @@ void event_accept(int fd){
 	connrbtree_insert(c);
 }
 
-void event_reconnect(struct eventhub * hub){
-	struct list_head * head = connlist_get();
-	if(!connlist_check(CONNSOCKETSERVER)){
-		struct connection * serverconn = connectserver();
-		if(serverconn){
-			eventhub_register(hub,connection_getfd(serverconn));
-		}
-	}
-	if(!connlist_check(CONNSERIALPORT)){
-		struct connection * serialconn = connserialport();
-		if(serialconn){
-			eventhub_register(hub,connection_getfd(serialconn));
-		}
-	}
-}
 
 int _check_command(unsigned char * buffer, int buflen, unsigned char command){
 	int i = 0;
