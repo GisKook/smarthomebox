@@ -29,6 +29,24 @@ static inline void bytebuffer_readdword(const unsigned char** s, unsigned int* d
 	*s += 4;
 }
 
+
+static inline void bytebuffer_readmac(const unsigned char ** s, unsigned long long *d){
+	*d = 0;
+	((unsigned char *)d)[0] = 0;
+	((unsigned char *)d)[1] = 0;
+	((unsigned char *)d)[2] = ((unsigned char *)*s)[0];
+	((unsigned char *)d)[3] = ((unsigned char *)*s)[1];
+	((unsigned char *)d)[4] = ((unsigned char *)*s)[2];
+	((unsigned char *)d)[5] = ((unsigned char *)*s)[3];
+	((unsigned char *)d)[6] = ((unsigned char *)*s)[4];
+	((unsigned char *)d)[7] = ((unsigned char *)*s)[5];
+	if(!ISBIGENDIAN){
+		*d = swap64(*d);
+	}
+
+	*s+=6;
+}
+
 static inline void bytebuffer_readquadword(const unsigned char ** s, unsigned long long *d){
 	*d = 0;
 	((unsigned char *)d)[0] = ((unsigned char *)*s)[0];
@@ -68,6 +86,11 @@ static inline void bytebuffer_writeword( unsigned char **s, unsigned short d){
 static inline void bytebuffer_writedword( unsigned char **s, unsigned int d){
 	*((unsigned int *)(*s)) = ISBIGENDIAN?d:swap32(d);
 	*s += 4;
+}
+
+static inline void bytebuffer_writemac( unsigned char **s, unsigned long long d){
+	(*((unsigned long long *)(*s))) = ISBIGENDIAN?d:swap64(d);
+	*s += 6;
 }
 
 static inline void bytebuffer_writequadword( unsigned char **s, unsigned long long d){

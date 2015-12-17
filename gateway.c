@@ -1,35 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include "list.h"
+#include "gateway.h"
 
-#define MAXNAMELEN 255
-#define MAXCLUSTER 36
-
-struct endpoint{
-	struct list_head list;
-	unsigned char ep;
-	unsigned short clusteridcount;
-	unsigned short clusterid[MAXCLUSTER];
-};
-
-struct device{
-	struct list_head list;
-	unsigned short deviceid;
-	char devicename[MAXNAMELEN];
-	unsigned short endpointcount;
-	struct list_head eplisthead;
-	unsigned char devicestatus;
-	unsigned short company;
-};
-
-struct gateway{
-	unsigned long long gatewayid;
-	char gatewayname[MAXNAMELEN];
-	unsigned short devicecount;
-	unsigned char boxversion;
-	unsigned char protocolversion;
-	struct list_head head;
-};
+#define min(a,b) a>b?b:a
 
 struct endpoint * _endpiont_create(unsigned char ep, unsigned short clusterid){ 
 	struct endpoint * endpoint = (struct endpoint *)malloc(sizeof(struct endpoint));
@@ -110,3 +83,4 @@ void gateway_deldevice(struct gateway * gw, struct device *d){
 
 	free(d);
 }
+

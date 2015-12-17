@@ -1,20 +1,8 @@
 #include <string.h>
 #include <stdio.h>
-#include <time.h>
-#include "kfifo.h"
-#include "rbtree.h"
 #include "connection.h"
 
 #define MAXBUFLEN 1024
-
-struct connection{
-	int fd;
-	unsigned char type;
-	struct kfifo * rawfifo;
-	struct list_head list;
-	struct rb_node node;
-	time_t timestamp;
-};
 
 struct connection * connection_create(){
 	struct connection * conn = (struct connection*) malloc(sizeof(struct connection));

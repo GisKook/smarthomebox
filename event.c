@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include "connection.h"
 #include "protocol.h"
 #include "toolkit.h"
@@ -6,6 +7,8 @@
 #include "cetimer.h"
 #include "socket.h"
 #include "termcontrol.h" 
+#include "gateway.h"
+#include "list.h"
 
 void event_accept(int fd){
 	struct connection * c = freeconnlist_getconn();
@@ -47,16 +50,16 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 			unsigned char heart_buf[255];
 			unsigned int hbuflen;
 			
-			hbuflen = encodeheart(gateway , heat_buf);
+			hbuflen = encode_heart(getgateway(), heart_buf);
 			struct list_head *pos, *n;
-			list_for_each_safe(pos, n, &connlisthead){
-				struct connection * c = list_entry(pos, struct connection, list);
+			list_for_each_safe(pos, n, connlist_get()){
+				struct connection *c = list_entry(pos, struct connection, list);
 				if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER))
 				{
 					for(;;){
-						int n = write(c->fd,heart_buf,hbuflen);
+						int n = write(connection_getfd(c),heart_buf,hbuflen);
 						if(n < 0){
-							fprintf(stdout, "%s\n", strerror(errno));
+							fprintf(stdout, "%s \n", strerror(errno));
 						}
 						break;
 					}
@@ -89,6 +92,8 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 		unsigned short messageid = 0;	
 		int messagelen = znpframe_check(c, &messageid);
 		char buffer[1024] = {0};
+		unsigned char alarm_buf[255];
+	
 		connection_get(c, buffer, messagelen);
 		switch(messageid){
 			case  AFINCOMINGDATA:
@@ -104,6 +109,23 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 			case ZDOSTARTUPRSP:
 				break;
 			case AFDATAREQRSP:
+
+		//		unsigned int alarmlen = encode_alarm(gateway, alarm_buf,);
+
+		//		struct list_head *pos, *n;
+		//		list_for_each_safe(pos, n, &connlisthead)
+		//		struct connection * c = list_entry(pos, struct connection, list);
+		//			if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER))
+		//			{
+		//				for(;;){
+		//					int n = write(c->fd,alarm_buf,alarmlen);
+		//					if(n < 0){
+		//					fprintf(stdout, "%s\n", strerror(errno));
+		//					}
+		//						break;
+		//					}
+		//			}
+
 				break;
 			case ILLEGAL:
 				break;

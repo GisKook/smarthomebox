@@ -1,12 +1,24 @@
+#ifndef __CE_CONNECTION_H_H
+#define __CE_CONNECTION_H_H
 
+#include <time.h>
 #include "list.h"
+#include "rbtree.h"
+#include "kfifo.h"
 
 #define CONNSERIALPORT 1
 #define CONNSOCKETCLIENT 2
 #define CONNSOCKETSERVER 3
 #define CONNSOCKETCMD 4
 
-struct connection;
+struct connection{
+	int fd;
+	unsigned char type;
+	struct kfifo * rawfifo;
+	struct list_head list;
+	struct rb_node node;
+	time_t timestamp;
+};
 
 void connection_init(struct connection * c, int fd, unsigned char type);
 void connection_put(struct connection * c, unsigned char * buf, unsigned int buflen);
@@ -28,3 +40,5 @@ void connlist_checkstatus(long timestamp);
 struct connection * connrbtree_getconn(int fd);
 void connrbtree_insert(struct connection *c);
 void connrbtree_del(struct connection * c); 
+
+#endif
