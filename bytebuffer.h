@@ -2,6 +2,11 @@
 #include <string.h>
 #include "endianness.h"
 
+static inline void bytebuffer_skipbyte(const unsigned char **s)
+{
+	(*s)++;
+}
+
 static inline void bytebuffer_readbyte(const unsigned char** s, unsigned char* d){
 	*d = (unsigned char)**s; (*s)++;
 }

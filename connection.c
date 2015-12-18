@@ -78,7 +78,7 @@ void freeconnlist_add(struct connection * c){
 	list_add_tail(&c->list, &freeconnlisthead);
 }
 
-static struct rb_root connrbtreeroot = RB_ROOT;
+static struct rb_root connrbtreeroot = {NULL};
 
 static LIST_HEAD(connlisthead);
 
@@ -159,7 +159,6 @@ void connrbtree_insert(struct connection *c){
 		return;
 	rb_insert_color(&c->node, &connrbtreeroot);
 	list_add_tail(&c->list, &connlisthead);
-
 }
 
 void connrbtree_del(struct connection * c){ 
