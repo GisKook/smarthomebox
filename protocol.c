@@ -46,7 +46,7 @@ int protocol_check(struct connection * c, unsigned short * messageid){
 				protocol_check(c, &tmp); 
 			}
 		}
- 
+
 
 	}else{
 		*messageid = HALFPACK;
@@ -68,24 +68,23 @@ int znpframe_check(struct connection *c, unsigned short *messageid) {
 		return 0;
 	}
 	unsigned short tmp;
-	if(buf[0] != 0xFE){ //SOF: Start of frame indicator. This is always set to 0xFE.
+	if(buf[0] != 0xCE){ //SOF: Start of frame indicator. This is always set to 0xFE.
 		connection_readbuf_pop(c);
 		znpframe_check(c, &tmp);
 	}else if(len > 2) {
 		unsigned char datalen = buf[1];
-		if(datalen < 0 || datalen > 250) {//The length of the data field of the frame. The length can range from 0-250.
+		if(datalen != 0x0B) {//The length of the data field of the frame. The length can range from 0-250.
 			connection_readbuf_pop(c);
 			znpframe_check(c, &tmp);
 		}
-		unsigned char messagelen = datalen + 5;
+		unsigned char messagelen = datalen + 2;
 		if(messagelen > len){
 			*messageid = HALFPACK;
 			return 0;
 		}else {
-			unsigned char checksum = protocol_checksum(buf + 1, datalen + 3); //This field is computed as an XOR of all the bytes in the general format frame fields.
-			if(checksum == buf[messagelen - 1]) {
-				unsigned short cmdid = bytebuffer_getword(buf + 2);
-				*messageid = cmdid;
+			unsigned char checksum = protocol_checksum(buf + 2,  datalen - 1); //This field is computed as an XOR of all the bytes in the general format frame fields.
+			if(checksum == buf[messagelen - 1]) {				
+				*messageid = BUSSINESSDATA;
 				return messagelen;
 			}else {	
 				connection_readbuf_pop(c);
@@ -93,7 +92,7 @@ int znpframe_check(struct connection *c, unsigned short *messageid) {
 			}
 		}		
 	}else{
-			*messageid = HALFPACK;
-			return 0;
+		*messageid = HALFPACK;
+		return 0;
 	}
 }

@@ -17,6 +17,8 @@
 #define ZDOSTARTUPRSP    0x6540
 #define AFDATAREQRSP     0x6401
 
+#define BUSSINESSDATA    0x4444
+
 struct connection;
 int protocol_check(struct connection * c, unsigned short * messageid);
 int znpframe_check(struct connection  *c, unsigned short * messageid);
