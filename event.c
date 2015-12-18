@@ -145,6 +145,5 @@ void event_close(int fd){
 	struct connection * c = connrbtree_getconn(fd);
 	if(c){ 
 		connrbtree_del(c);
-		freeconnlist_add(c);
 	}
 }

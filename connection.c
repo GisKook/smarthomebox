@@ -56,7 +56,6 @@ unsigned char connection_gettype(struct connection * c){
 void connection_close(struct connection * c){
 	close(c->fd);
 	connrbtree_del(c); 
-	freeconnlist_add(c);
 }
 
 static LIST_HEAD(freeconnlisthead);
@@ -67,8 +66,7 @@ struct connection * freeconnlist_getconn(){
 	}else{
 		struct connection *c = list_first_entry(&freeconnlisthead, struct connection, list);
 		kfifo_reset(c->rawfifo);
-		list_del(&c->list);
-		INIT_LIST_HEAD(&c->list);
+		list_del_init(&c->list);
 		c->timestamp = time(NULL);
 		c->type=CONNFREE;
 		c->fd=0;
@@ -169,7 +167,7 @@ struct connection * _connrbtree_insert(struct connection *c){
 }
 
 void connrbtree_insert(struct connection *c){
-	fprintf(stdout, "insert %d %d\n", c->fd, c->type);
+	fprintf(stdout, "insert %d %d %x\n", c->fd, c->type, c);
 	struct connection * ret;
 
 	if(( ret = _connrbtree_insert(c))){
@@ -182,8 +180,9 @@ void connrbtree_insert(struct connection *c){
 }
 
 void connrbtree_del(struct connection * c){ 
+	fprintf(stdout, "del %d %d %x\n", c->fd, c->type, c);
 	rb_erase(&c->node, &connrbtreeroot);
-	list_del(&c->list);
+	list_del_init(&c->list);
 	freeconnlist_add(c);
 	_connrbtree_dump();
 }
