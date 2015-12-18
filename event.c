@@ -30,23 +30,31 @@ int _check_command(unsigned char * buffer, int buflen, unsigned char command){
 	return 0;
 }
 
+void event_reconnect(struct eventhub * hub){
+	struct list_head * head = connlist_get();
+	if(!connlist_check(CONNSOCKETSERVER)){
+		struct connection * serverconn = connectserver();
+		if(serverconn){
+			eventhub_register(hub,connection_getfd(serverconn));
+		}
+	}
+	if(!connlist_check(CONNSERIALPORT)){
+		struct connection * serialconn = connserialport();
+		if(serialconn){
+			eventhub_register(hub,connection_getfd(serialconn));
+		}
+	}
+	time_t t = time(NULL);
+	connlist_checkstatus(t);
+}
+
 void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int buflen){
 	fprintf(stdout, "IN ");
 	toolkit_printbytes(buf, buflen);
 	struct connection * c = connrbtree_getconn(fd);
 	if(c && connection_gettype(c) == CONNSOCKETCMD){ 
-		if( _check_command(buf, buflen, CERECONNSOCKET[0])){
-			struct connection * serverconn = connectserver();
-			if(serverconn){
-				eventhub_register(hub,connection_getfd(serverconn));
-			}
-		}
-		if( _check_command(buf, buflen, CERECONNSERIAL[0])){
-			struct connection * connserial = connserialport();
-
-			if(connserial){
-				eventhub_register(hub, connection_getfd(connserial));
-			}
+		if( _check_command(buf, buflen, CECHECK[0])){
+			event_reconnect(hub);
 		}
 		if( _check_command(buf, buflen, HEARTBEAT[0])){
 

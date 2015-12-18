@@ -22,7 +22,7 @@ int  openterm(struct termconf * conf){
 		return NULL;
 	}
 	set_term_attribs(fd, conf);
-	set_blocking(fd, 0);
+	set_blocking(fd, 1);
 
 	return fd;
 }
@@ -99,6 +99,7 @@ int main(){
 	struct termconf * conf = (struct termconf *)malloc(sizeof(struct termconf));
 	memset(conf, 0, sizeof(struct termconf));
 	conf->portname = strdup("/dev/ttyO1");
+	//conf->portname = strdup("/dev/tnt0");
 	conf->speed = 115200;
 	conf->parity = 0;
 

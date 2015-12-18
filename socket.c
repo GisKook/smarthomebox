@@ -4,7 +4,11 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
 #include <string.h>
+#include <assert.h>
+#include <time.h>
 #include "connection.h"
 #include "ceconf.h"
 
@@ -126,3 +130,44 @@ struct connection * createpipe(int * wfd){
 
 	return conn;
 }
+
+int sendnonblocking(int fd, char * buf, int buflen){ 
+	int n;
+	for(;;){
+		n = write(fd, buf, buflen);
+		if (n == -1) {
+			if(errno == EINTR) continue;
+			else if(errno == EAGAIN) break;
+			else {
+				assert(0);
+				break;
+			}
+		} else if (n != buflen) {
+			assert(0);
+			break;
+		} else { break; }
+	}
+
+	return n;
+}
+
+int readnonblocking(int fd, char * buf, int buflen){
+	int n;
+	for(;;){
+		n = read(fd, buf, buflen);
+		if (n == -1) {
+			if(errno == EINTR) continue;
+			else if(errno == EAGAIN) break;
+			else {
+				assert(0);
+				break;
+			}
+		} else if ((size_t)n != buflen) {
+			assert(0);
+			break;
+		} else { break; }
+	}
+
+	return n;
+}
+

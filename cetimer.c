@@ -7,6 +7,7 @@
 #include <string.h>
 #include "connection.h"
 #include "cetimer.h"
+#include "socket.h"
 
 typedef void (*sighandler_t)(int);
 struct cetimer{ 
@@ -18,67 +19,14 @@ struct cetimer{
 };
 
 static struct cetimer * s_timer = NULL;
-//static struct cetimer * heart_timer
-
-void reconnect(unsigned char conntype){
-	struct list_head * head = connlist_get();
-	int n = 0;
-	if(!connlist_check(conntype)){
-		for(;;){
-			if(conntype == CONNSOCKETSERVER){
-				n = write(s_timer->wfd,CERECONNSOCKET,1);
-			}else if(conntype == CONNSERIALPORT){
-				n = write(s_timer->wfd, CERECONNSERIAL, 1);
-			}
-
-			if(n < 0){ 
-				fprintf(stdout, "%s\n", strerror(errno));
-			}
-			break;
-		}
-	}
-}
 
 void checkstatus(int i){ 
-	struct list_head * head = connlist_get();
-	if(!connlist_check(CONNSOCKETSERVER)){
-		for(;;){
-			int n = write(s_timer->wfd,CERECONNSOCKET,1);
-			if(n < 0){ 
-				fprintf(stdout, "%s\n", strerror(errno));
-			}
-			break;
-		}
-	}
-	
-	if(!connlist_check(CONNSERIALPORT)){
-		for(;;){
-			int n = write(s_timer->wfd,CERECONNSERIAL,1);
-			if(n < 0){ 
-				fprintf(stdout, "%s\n", strerror(errno));
-			}
-			break;
-		}
-
-	} 
+	sendnonblocking(s_timer->wfd, CECHECK, 1);
 	time_t t = time(NULL);
-         if(t%60==0){
-                  for(;;){
-                          int n = write(s_timer->wfd,HEARTBEAT,1);
-                          if(n < 0){
-                                  fprintf(stdout, "%s\n", strerror(errno));
-                          }
-                          break;
-                  }
-  
-          }
-
-
-
-	connlist_checkstatus(t);
+	if(t%60==0){
+		sendnonblocking(s_timer->wfd, HEARTBEAT, 1);
+	}
 }
-
- 
 
 struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd){
 	if(s_timer == NULL){
@@ -96,29 +44,6 @@ struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, i
 
 	return s_timer;
 }
-/*
-struct cetimer * cetimer_create(unsigned int nextvalue, unsigned int interval, int wfd){
-        if(heart_timer == NULL){
-                struct cetimer * timer = (struct cetimer *)malloc(sizeof(struct cetimer));
-                timer->tnexttime.tv_sec = nextvalue;
-                timer->tinterval.tv_sec = interval;
-                timer->timer.it_interval = timer->tinterval;
-                timer->timer.it_value = timer->tnexttime;
-                setitimer(ITIMER_VIRTUAL, &timer->timer, 0);
-                timer->handler = ;
-                timer->wfd = wfd;
-  
-                heart_timer = timer;
-          }
-  
-          return heart_timer;
-  }
-
-void cetimer_start(struct cetimer * timer){
-         signal(SIGVTALRM, timer->handler);
-}
-*/
-
 
 void cetimer_start(struct cetimer * timer){
 	signal(SIGALRM, timer->handler);

@@ -1,7 +1,5 @@
 
-#define CERECONNSOCKET "R"
-#define CERECONNSERIAL "S"
-#define CEHEART "H"
+#define CECHECK "C"
 #define HEARTBEAT  "B"
 
 

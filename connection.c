@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "connection.h"
 
 #define MAXBUFLEN 1024
@@ -69,6 +70,9 @@ struct connection * freeconnlist_getconn(){
 		list_del(&c->list);
 		INIT_LIST_HEAD(&c->list);
 		c->timestamp = time(NULL);
+		c->type=CONNFREE;
+		c->fd=0;
+		memset(&c->node, 0, sizeof(struct rb_node));
 		
 		return c;
 	}
@@ -113,8 +117,7 @@ struct connection * connrbtree_getconn(int fd){
 	struct rb_root *root = &connrbtreeroot;
 	struct rb_node *node = root->rb_node;
 
-	struct connection * c;
-	while(node){
+	struct connection * c; while(node){
 		c  = rb_entry(node, struct connection, node);
 		if(fd > c->fd){
 			node = node->rb_right;
@@ -129,21 +132,34 @@ struct connection * connrbtree_getconn(int fd){
 }
 
 
+void _connrbtree_dump(){ 
+	struct rb_node * node = rb_first(&connrbtreeroot);
+	struct connection *c = rb_entry(node, struct connection, node);
+	fprintf(stdout, "--fd %d type %d \n", c->fd, c->type);
+	struct rb_node * n = rb_next(&c->node);
+	while(n){
+		struct connection *c = rb_entry(n, struct connection, node);
+		fprintf(stdout, "--fd %d type %d \n", c->fd, c->type);
+		n=rb_next(&c->node);
+	}
+}
+
 struct connection * _connrbtree_insert(struct connection *c){
 	struct rb_node **newnode = &connrbtreeroot.rb_node, *parent = NULL; 
 
 	struct connection * conn;
 
 	while(*newnode){ 
-		conn  = rb_entry(*newnode, struct connection, node);
 		parent = *newnode;
+		conn  = rb_entry(parent, struct connection, node);
 		
 		if(c->fd < conn->fd){
 			newnode = &((*newnode)->rb_left);
 		}else if(c->fd > conn->fd){
 			newnode = &((*newnode)->rb_right);
 		}else{
-			fprintf(stdout, "!!!(((rbtree alread has the fd  %d\n", c->fd);
+			fprintf(stdout, "!!!(((rbtree alread has the fd  %d the conn type is %d\n", c->fd, c->type);
+			_connrbtree_dump();
 			return conn;
 		}
 	}
@@ -153,16 +169,21 @@ struct connection * _connrbtree_insert(struct connection *c){
 }
 
 void connrbtree_insert(struct connection *c){
+	fprintf(stdout, "insert %d %d\n", c->fd, c->type);
 	struct connection * ret;
 
-	if(( ret = _connrbtree_insert(c)))
+	if(( ret = _connrbtree_insert(c))){
+		assert(0);
 		return;
+	}
 	rb_insert_color(&c->node, &connrbtreeroot);
 	list_add_tail(&c->list, &connlisthead);
+	_connrbtree_dump();
 }
 
 void connrbtree_del(struct connection * c){ 
 	rb_erase(&c->node, &connrbtreeroot);
 	list_del(&c->list);
 	freeconnlist_add(c);
+	_connrbtree_dump();
 }

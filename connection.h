@@ -6,6 +6,7 @@
 #include "rbtree.h"
 #include "kfifo.h"
 
+#define CONNFREE 0
 #define CONNSERIALPORT 1
 #define CONNSOCKETCLIENT 2
 #define CONNSOCKETSERVER 3
