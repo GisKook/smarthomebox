@@ -13,7 +13,7 @@ static struct ceconf{
 	"8989",
 	"192.168.8.42",
 	"8990",
-	"/dev/tnt0",
+	"/dev/ttyO1",
 	115200,
 	0,
 	60,
