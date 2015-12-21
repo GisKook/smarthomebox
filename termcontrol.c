@@ -46,8 +46,10 @@ int set_term_attribs(int fd, struct termconf * conf){
 		return -1;
 	}
 
-	cfsetospeed (&tty, conf->speed);
-	cfsetispeed (&tty, conf->speed);
+//	cfsetospeed (&tty, conf->speed);
+//	cfsetispeed (&tty, conf->speed);
+	cfsetospeed (&tty, B115200);
+	cfsetispeed (&tty, B115200);
 
 	tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
 	// disable IGNBRK for mismatched speed tests; otherwise receive break

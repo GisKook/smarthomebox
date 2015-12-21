@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
 #include "eventhub.h"
 #include "connection.h"
 #include "toolkit.h"
@@ -9,10 +10,13 @@
 #include "connection.h"
 #include "termcontrol.h"
 #include "reconn.h"
+#include "gateway.h"
 
 int main(){ 
 	unsigned long long mac = toolkit_getmac();
+	gateway_init(getgateway(), mac, "gateway", 1, 1);
 	fprintf(stdout, "%llu\n", mac);
+	fprintf(stdout, "main threadid %X\n", pthread_self());
 
 	// create pipe for timer to main
 	int wfd;
@@ -48,10 +52,10 @@ int main(){
 	}
 
 	// conn to serial port
-	//struct connection * connserial = connserialport();
-	//if(connserial){ 
-	//	eventhub_register(hub, connection_getfd(connserial));
-	//}
+	struct connection * connserial = connserialport();
+	if(connserial){ 
+		eventhub_register(hub, connection_getfd(connserial));
+	}
 
 	eventhub_start(hub);
 }

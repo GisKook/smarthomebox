@@ -62,6 +62,7 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 			}
 		}
 	}else if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER)){
+	//}else if(c && connection_gettype(c) == CONNSERIALPORT){
 		connection_put(c, buf, buflen); 
 		unsigned short messageid = 0;
 		int messagelen = protocol_check(c, &messageid);
@@ -82,6 +83,7 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 			case ILLEGAL:
 				break;
 		}
+	//}else if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER)){
 	}else if(c && connection_gettype(c) == CONNSERIALPORT){
 		connection_put(c, buf, buflen);
 		unsigned short messageid = 0;	
@@ -91,7 +93,6 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 
 		Bussinessdata payload;
 		memset(&payload, 0, sizeof(Bussinessdata));	
-
 		switch(messageid){
 			case  AFINCOMINGDATA:
 				break;
@@ -108,8 +109,6 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 			case AFDATAREQRSP:
 				break;
 
-
-
 			case BUSSINESSDATA:
 				{
 					dataparse(&payload, buffer, messagelen);	
@@ -118,18 +117,19 @@ void event_recvmsg(struct eventhub * hub, int fd, unsigned char * buf, int bufle
 					datalen = encode_alarm(getgateway(), databuf,&payload);
 					struct list_head *pos, *n;
 					list_for_each_safe(pos, n, connlist_get()){
-					struct connection *c = list_entry(pos, struct connection, list);
-					if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER))
-							{
-							
-									int n = sendnonblocking(connection_getfd(c),databuf,datalen);
+						struct connection *c = list_entry(pos, struct connection, list);
+						if(c && (connection_gettype(c) == CONNSOCKETCLIENT || connection_gettype(c) == CONNSOCKETSERVER))
+						{
+
+							int n = sendnonblocking(connection_getfd(c),databuf,datalen);
 						}
 
 
+					}
 				}
 				break;
-
-
+			case HALFPACK:
+				break;
 			case ILLEGAL:
 				break;
 			default:

@@ -94,12 +94,37 @@ static inline void bytebuffer_writedword( unsigned char **s, unsigned int d){
 }
 
 static inline void bytebuffer_writemac( unsigned char **s, unsigned long long d){
-	(*((unsigned long long *)(*s))) = ISBIGENDIAN?d:swap64(d);
-	*s += 6;
+	if(ISBIGENDIAN){
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[0];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[1];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[2];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[3];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[4];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[5];
+		(*s)++;
+	}else{
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[5];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[4];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[3];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[2];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[1];
+		(*s)++;
+		*((unsigned char*)(*s)) = ((unsigned char*)&d)[0];
+		(*s)++;
+	}
 }
 
 static inline void bytebuffer_writequadword( unsigned char **s, unsigned long long d){
-	(*((unsigned long long *)(*s))) = ISBIGENDIAN?d:swap64(d);
+	*((unsigned long long *)(*s)) = ISBIGENDIAN?d:swap64(d);
 	*s += 8;
 }
 

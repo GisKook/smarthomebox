@@ -58,7 +58,7 @@ struct gateway * getgateway(){
 	return &gatewayinstance;
 }
 
-void geteway_init(struct gateway * gw,unsigned long long gatewayid, char * gatewayname, unsigned char boxversion, unsigned char protocolversion){ 
+void gateway_init(struct gateway * gw,unsigned long long gatewayid, char * gatewayname, unsigned char boxversion, unsigned char protocolversion){ 
 	gw->gatewayid = gatewayid;
 	memset(gw->gatewayname, 0, MAXNAMELEN);
 	memcpy(gw->gatewayname, gatewayname, min(strlen(gatewayname), MAXNAMELEN-1));

@@ -3,6 +3,7 @@
 #include "sq.h"
 #include "bytebuffer.h"
 #include "gateway.h"
+#include "bussinessdata.h"
 
 unsigned char encode_checksum(unsigned char * buf, unsigned int buflen);
 //unsigned char parse_setdevicename(struct sqlitedb *sdb,buf)
