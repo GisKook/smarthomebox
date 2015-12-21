@@ -122,7 +122,7 @@ unsigned int encode_operback(struct gateway *gw, unsigned char *buf,unsigned sho
 }
 
 #define ALARM  0X0006
-unsigned int encode_alarm(struct gateway *gw, unsigned char *buf)
+unsigned int encode_alarm(struct gateway *gw, unsigned char *buf,Bussinessdata *data)
 {
 	unsigned char *p = buf;
 	unsigned long long ctime;
@@ -130,13 +130,13 @@ unsigned int encode_alarm(struct gateway *gw, unsigned char *buf)
 	bytebuffer_writeword(&p,0X1E);
 	bytebuffer_writeword(&p,ALARM);
 	bytebuffer_writemac(&p,gw->gatewayid);
-	bytebuffer_writebyte(&p,0);
+	bytebuffer_writebyte(&p,data->zonetype);
 	bytebuffer_writebyte(&p,0x06);
 	bytebuffer_writemac(&p,0x000000000001);
 
 	ctime = time(NULL);
 	bytebuffer_writequadword(&p,ctime);
-	bytebuffer_writebyte(&p,0);
+	bytebuffer_writebyte(&p,data->status.Alarm1);
 
 	unsigned int templen = p-buf;
 	unsigned char checksum = encode_checksum(buf,templen);
