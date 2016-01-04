@@ -98,7 +98,7 @@ void toolkit_printbytes(unsigned char* buf, unsigned int len){
 int main(){
 	struct termconf * conf = (struct termconf *)malloc(sizeof(struct termconf));
 	memset(conf, 0, sizeof(struct termconf));
-	conf->portname = strdup("/dev/ttyO1");
+	conf->portname = strdup("/dev/ttyUSB0");
 	//conf->portname = strdup("/dev/tnt0");
 	conf->speed = 115200;
 	conf->parity = 0;
