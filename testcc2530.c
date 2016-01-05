@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <termios.h>
 #include <string.h>
-
+#include "cc2530.h"
+#include "cluster.h"
 
 struct termconf{
 	char * portname; 
@@ -108,6 +109,34 @@ int main(){
 
 	int fd = openterm(conf); 
 	
+	cc2530_startup(fd);
+	struct af_register reg;
+	reg.endpoint = 23;
+	reg.appprofid = 11;
+	reg.appdeviceid = 12;
+	reg.appdevversion = 13;
+	reg.latencyreq = 0x00;
+	reg.appnuminclusters = 8;
+	reg.appinclusterlist[0] = ONOFF;
+	reg.appinclusterlist[1] = ALARMS;
+	reg.appinclusterlist[2] = POLL_CONTROL;
+	reg.appinclusterlist[3] = DOOR_LOCK;
+	reg.appinclusterlist[4] = WINDOW_COVERING;
+	reg.appinclusterlist[5] = IAS_ZONE;
+	reg.appinclusterlist[6] = IAS_ACE;
+	reg.appinclusterlist[7] = IAS_WD;
+	reg.appnumoutclusters = 8;
+	reg.appoutclusterlist[0] = ONOFF;
+	reg.appoutclusterlist[1] = ALARMS;
+	reg.appoutclusterlist[2] = POLL_CONTROL;
+	reg.appoutclusterlist[3] = DOOR_LOCK;
+	reg.appoutclusterlist[4] = WINDOW_COVERING;
+	reg.appoutclusterlist[5] = IAS_ZONE;
+	reg.appoutclusterlist[6] = IAS_ACE;
+	reg.appoutclusterlist[7] = IAS_WD;
+	cc2530_af_register(fd, &reg);
+	//cc2530_startrequst(fd);
+	cc2530_zdo_startup_from_app(fd, 100);
 	int count;
 	char buf[1024];
 	for(;;){

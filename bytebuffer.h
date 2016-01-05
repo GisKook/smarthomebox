@@ -21,6 +21,17 @@ static inline void bytebuffer_readword(const unsigned char** s, unsigned short* 
 	*s += 2;
 }
 
+static inline void bytebuffer_readwordl(const unsigned char** s, unsigned short* d){
+	*d = 0;
+	((unsigned char *)d)[0] = ((unsigned char *)*s)[0];
+	((unsigned char *)d)[1] = ((unsigned char *)*s)[1];
+	if(ISBIGENDIAN){
+		*d = swap16(*d);
+	}
+	*s += 2;
+}
+
+
 static inline void bytebuffer_readdword(const unsigned char** s, unsigned int* d){
 	*d = 0;
 	((unsigned char *)d)[0] = ((unsigned char *)*s)[0];
@@ -28,6 +39,19 @@ static inline void bytebuffer_readdword(const unsigned char** s, unsigned int* d
 	((unsigned char *)d)[2] = ((unsigned char *)*s)[2];
 	((unsigned char *)d)[3] = ((unsigned char *)*s)[3];
 	if (!ISBIGENDIAN){
+		*d = swap32(*d);
+	}
+
+	*s += 4;
+}
+
+static inline void bytebuffer_readdwordl(const unsigned char** s, unsigned int* d){
+	*d = 0;
+	((unsigned char *)d)[0] = ((unsigned char *)*s)[0];
+	((unsigned char *)d)[1] = ((unsigned char *)*s)[1];
+	((unsigned char *)d)[2] = ((unsigned char *)*s)[2];
+	((unsigned char *)d)[3] = ((unsigned char *)*s)[3];
+	if (ISBIGENDIAN){
 		*d = swap32(*d);
 	}
 
@@ -69,6 +93,23 @@ static inline void bytebuffer_readquadword(const unsigned char ** s, unsigned lo
 	*s+=8;
 }
 
+static inline void bytebuffer_readquadwordl(const unsigned char ** s, unsigned long long *d){
+	*d = 0;
+	((unsigned char *)d)[0] = ((unsigned char *)*s)[0];
+	((unsigned char *)d)[1] = ((unsigned char *)*s)[1];
+	((unsigned char *)d)[2] = ((unsigned char *)*s)[2];
+	((unsigned char *)d)[3] = ((unsigned char *)*s)[3];
+	((unsigned char *)d)[4] = ((unsigned char *)*s)[4];
+	((unsigned char *)d)[5] = ((unsigned char *)*s)[5];
+	((unsigned char *)d)[6] = ((unsigned char *)*s)[6];
+	((unsigned char *)d)[7] = ((unsigned char *)*s)[7];
+	if(ISBIGENDIAN){
+		*d = swap64(*d);
+	}
+
+	*s+=8;
+}
+
 static inline void bytebuffer_readbytes( const unsigned char ** s, char * str, int len){
 	int i;
 	for(i = 0; i < len; i++) {
@@ -88,8 +129,18 @@ static inline void bytebuffer_writeword( unsigned char **s, unsigned short d){
 	*s += 2;
 }
 
+static inline void bytebuffer_writewordl( unsigned char **s, unsigned short d){
+	*((unsigned short *)(*s)) = !ISBIGENDIAN?d:swap16(d);
+	*s += 2;
+}
+
 static inline void bytebuffer_writedword( unsigned char **s, unsigned int d){
 	*((unsigned int *)(*s)) = ISBIGENDIAN?d:swap32(d);
+	*s += 4;
+}
+
+static inline void bytebuffer_writedwordl( unsigned char **s, unsigned int d){
+	*((unsigned int *)(*s)) = !ISBIGENDIAN?d:swap32(d);
 	*s += 4;
 }
 
@@ -125,6 +176,11 @@ static inline void bytebuffer_writemac( unsigned char **s, unsigned long long d)
 
 static inline void bytebuffer_writequadword( unsigned char **s, unsigned long long d){
 	*((unsigned long long *)(*s)) = ISBIGENDIAN?d:swap64(d);
+	*s += 8;
+}
+
+static inline void bytebuffer_writequadwordl( unsigned char **s, unsigned long long d){
+	*((unsigned long long *)(*s)) = !ISBIGENDIAN?d:swap64(d);
 	*s += 8;
 }
 
