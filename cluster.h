@@ -1,3 +1,8 @@
+#define BASIC                                     0x0000    // General Basic 0x0000                                      
+#define POWER_CONFIGURATION                       0x0001    // General Power Configuration 0x0001
+#define DEVICE_TEMPERATURE_CONFIGURATION          0x0002    // General Device Temperature Configuration 0x0002
+#define IDENTIFY                                  0x0003    // General Identify 0x0003
+#define GROUPS                                    0x0004    // General Groups 0x0004
 #define SCENES                                    0x0005    // General Scenes 0x0005
 #define ONOFF                                     0x0006    // General On/Off 0x0006
 #define ONOFF_SWITCH_CONFIGURATION                0x0007    // General On/Off Switch Configuration 0x0007

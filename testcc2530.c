@@ -9,6 +9,7 @@
 #include <string.h>
 #include "cc2530.h"
 #include "cluster.h"
+#include "endianness.h"
 
 struct termconf{
 	char * portname; 
@@ -19,11 +20,11 @@ struct termconf{
 int set_term_attribs(int fd, struct termconf * conf);
 void set_blocking (int fd, int should_block);
 
-int  openterm(struct termconf * conf){
+int openterm(struct termconf * conf){
 	int fd = open(conf->portname, O_RDWR | O_NOCTTY | O_SYNC);
 	if (fd < 0){
 		fprintf(stdout, "error %d opending %s: %s\n", errno, conf->portname, strerror(errno));
-		return NULL;
+		return -1;
 	}
 	set_term_attribs(fd, conf);
 	set_blocking(fd, 1);
@@ -108,36 +109,43 @@ int main(){
 	conf->parity = 0;
 
 	int fd = openterm(conf); 
+	if(fd<0){
+		return;
+	}
 	
 	cc2530_startup(fd);
 	struct af_register reg;
-	reg.endpoint = 23;
-	reg.appprofid = 11;
+	reg.endpoint = 10;
+	reg.appprofid = 0x0104;
 	reg.appdeviceid = 12;
 	reg.appdevversion = 13;
 	reg.latencyreq = 0x00;
-	reg.appnuminclusters = 8;
-	reg.appinclusterlist[0] = ONOFF;
-	reg.appinclusterlist[1] = ALARMS;
-	reg.appinclusterlist[2] = POLL_CONTROL;
-	reg.appinclusterlist[3] = DOOR_LOCK;
-	reg.appinclusterlist[4] = WINDOW_COVERING;
-	reg.appinclusterlist[5] = IAS_ZONE;
-	reg.appinclusterlist[6] = IAS_ACE;
-	reg.appinclusterlist[7] = IAS_WD;
-	reg.appnumoutclusters = 8;
-	reg.appoutclusterlist[0] = ONOFF;
-	reg.appoutclusterlist[1] = ALARMS;
-	reg.appoutclusterlist[2] = POLL_CONTROL;
-	reg.appoutclusterlist[3] = DOOR_LOCK;
-	reg.appoutclusterlist[4] = WINDOW_COVERING;
-	reg.appoutclusterlist[5] = IAS_ZONE;
-	reg.appoutclusterlist[6] = IAS_ACE;
-	reg.appoutclusterlist[7] = IAS_WD;
+	reg.appnuminclusters = 10;
+	reg.appinclusterlist[0] = swap16(ONOFF);
+	reg.appinclusterlist[1] = swap16(ALARMS);
+	reg.appinclusterlist[2] = swap16(POLL_CONTROL);
+	reg.appinclusterlist[3] = swap16(DOOR_LOCK);
+	reg.appinclusterlist[4] = swap16(WINDOW_COVERING);
+	reg.appinclusterlist[5] = swap16(IAS_ZONE);
+	reg.appinclusterlist[6] = swap16(IAS_ACE);
+	reg.appinclusterlist[7] = swap16(IAS_WD);
+	reg.appinclusterlist[8] = swap16(BASIC);
+	reg.appinclusterlist[9] = swap16(IDENTIFY);
+	reg.appnumoutclusters = 10;
+	reg.appoutclusterlist[0] = swap16(ONOFF);
+	reg.appoutclusterlist[1] = swap16(ALARMS);
+	reg.appoutclusterlist[2] = swap16(POLL_CONTROL);
+	reg.appoutclusterlist[3] = swap16(DOOR_LOCK);
+	reg.appoutclusterlist[4] = swap16(WINDOW_COVERING);
+	reg.appoutclusterlist[5] = swap16(IAS_ZONE);
+	reg.appoutclusterlist[6] = swap16(IAS_ACE);
+	reg.appoutclusterlist[7] = swap16(IAS_WD);
+	reg.appoutclusterlist[8] = swap16(BASIC);
+	reg.appoutclusterlist[9] = swap16(IDENTIFY);
 	cc2530_af_register(fd, &reg);
 	//cc2530_startrequst(fd);
 	cc2530_zdo_startup_from_app(fd, 100);
-	int count;
+	int count = 0;
 	char buf[1024];
 	for(;;){
 		count = read (fd, buf, sizeof (buf));

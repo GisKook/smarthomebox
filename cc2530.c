@@ -29,6 +29,7 @@ any other API operations.
 #include <stdio.h>
 #include "bytebuffer.h"
 #include "cc2530zcomdef.h"
+#include "cc2530_encodecommand.h"
 
 void _toolkit_printbytes(unsigned char* buf, unsigned int len){
 	unsigned int i;
@@ -42,7 +43,7 @@ void _toolkit_printbytes(unsigned char* buf, unsigned int len){
 void cc2530_startup(int fd){ 
 	unsigned char buf[255] = {0};
 	unsigned char value[128] = {0};
-	unsigned char len = cc2530_encode_zb_write_configuration(buf, ZCD_NV_LOGICAL_TYPE, &value, 1); 
+	unsigned char len = cc2530_encode_zb_write_configuration(buf, ZCD_NV_LOGICAL_TYPE, value, 1); 
 	_toolkit_printbytes(buf, len);
 	if( write(fd, buf, len) <= 0){
 		fprintf(stdout, "set logial error\n");
@@ -55,7 +56,7 @@ void cc2530_startup(int fd){
 		fprintf(stdout, "set pan id error\n");
 	};
 	unsigned char * tmp = value;
-	bytebuffer_writedwordl(&tmp, 0x07FFF800);
+	bytebuffer_writedword(&tmp, 0x07FFF800);
 	len = cc2530_encode_zb_write_configuration(buf, ZCD_NV_CHANLIST, value, 4); 
 
 	_toolkit_printbytes(buf, len);
