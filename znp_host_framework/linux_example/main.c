@@ -56,7 +56,7 @@ void *rpcTask(void *argument)
 
 void *appTask(void *argument)
 {
-	while (1)
+	//while (1)
 	{
 		appProcess(NULL);
 	}

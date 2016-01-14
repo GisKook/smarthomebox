@@ -1585,7 +1585,7 @@ void appProcess(void * args)
 	status = sysOsalNvWrite(&nvWrite);
 	initDone = 1;
 
-		while(1);
+	//	while(1);
 }
 
 uint32_t appInit(void)
