@@ -14,8 +14,8 @@ PROJ_DIR=
 
 all: dataSendRcv.bin
 
-dataSendRcv.bin: main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o
-	$(CC) main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o $(LIBS) -o dataSendRcv.bin
+dataSendRcv.bin: main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o commands.o 
+	$(CC) main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o commands.o $(LIBS) -o dataSendRcv.bin
 
 # rule for file "main.o".
 main.o: main.c
@@ -61,6 +61,15 @@ queue.o: $(PROJ_DIR)../framework/rpc/queue.h $(PROJ_DIR)../framework/rpc/queue.c
 # rule for file "appinit.o".
 appinit.o: $(PROJ_DIR)./appinit.h $(PROJ_DIR)./appinit.c
 	$(CC) $(CFLAGS) $(INCLUDE) $(DEFS) $(PROJ_DIR)./appinit.c
+
+# rule for file "appinit.o".
+appinit.o: $(PROJ_DIR)./appinit.h $(PROJ_DIR)./appinit.c ./commands.o
+	$(CC) $(CFLAGS) $(INCLUDE) $(DEFS) $(PROJ_DIR)./appinit.c
+
+# rule for file "commands.o".
+commands.o: $(PROJ_DIR)./commands.h $(PROJ_DIR)./commands.c
+	$(CC) $(CFLAGS) $(INCLUDE) $(DEFS) $(PROJ_DIR)./commands.c
+
 
 # rule for cleaning files generated during compilations.
 clean:

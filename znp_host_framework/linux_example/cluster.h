@@ -44,7 +44,7 @@
 #define DIAGNOSTICS                               0x0b05    // Home Automation Diagnostics 0x0b05
 
 #define CLUSTERCOUNT 41
-static g_clusters[CLUSTERCOUNT] = {
+static unsigned short g_clusters[CLUSTERCOUNT] = {
 	BASIC,
 	POWER_CONFIGURATION,
 	DEVICE_TEMPERATURE_CONFIGURATION,

@@ -1,5 +1,5 @@
-#ifndef __COMMAND_H_H
-#define __COMMAND_H_H
+#ifndef __GCOMMAND_H_H__
+#define __GCOMMAND_H_H__
 
 #define SYS_PING                  0 
 #define SYS_SET_EXTADDR           1 
@@ -76,6 +76,13 @@
 
 #define COMMANDS_SIZE  72
 
-static void sendCmd(unsigned char * req, unsigned char index);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+static void sendcmd(unsigned char * req, unsigned char cmdtype);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
