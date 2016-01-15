@@ -1521,20 +1521,60 @@ static int32_t startNetwork(void)
 
 static int32_t registerAf(void)
 {
-	int32_t status = 0;
-	RegisterFormat_t reg;
+	// register the in and out clusterid. step one
+	RegisterFormat_t req;
+	memset(&req, 0, sizeof(RegisterFormat_t));
+	req.EndPoint = 1;
+	req.AppProfId = 0x0104;
+	req.AppDeviceId = 1;
+	req.AppNumInClusters = 16;
+	int i;
+	for (i = 0; i < 16; i++){
+		req.AppInClusterList[i] = g_clusters[i];
+	}
+	req.AppNumOutClusters = 16;
+	for (i = 0; i < 16; i++){
+		req.AppOutClusterList[i] = g_clusters[i];
+	}
+	sendcmd((unsigned char *)&req, AF_REGISTER);
 
-	reg.EndPoint = 1;
-	reg.AppProfId = 0x0104;
-	reg.AppDeviceId = 0x0100;
-	reg.AppDevVer = 1;
-	reg.LatencyReq = 0;
-	reg.AppNumInClusters = 1;
-	reg.AppInClusterList[0] = 0x0006;
-	reg.AppNumOutClusters = 0;
+//	StartupFromAppFormat_t startupfromapp;
+//	startupfromapp.StartDelay = 0;
+//	sendcmd((unsigned char *)&startupfromapp, ZDO_STARTUP_FROM_APP);
 
-	status = afRegister(&reg);
-	return status;
+	// register step two.
+	memset(&req, 0, sizeof(RegisterFormat_t));
+	req.EndPoint = 10;
+	req.AppProfId = 0x0104;
+	req.AppDeviceId = 2;
+	req.AppNumInClusters = 16;
+	for (i = 0; i < 16; i++){
+		req.AppInClusterList[i] = g_clusters[16+i];
+	}
+	req.AppNumOutClusters = 16;
+	for (i = 0; i < 16; i++){
+		req.AppOutClusterList[i] = g_clusters[16+i];
+	}
+	sendcmd((unsigned char *)&req, AF_REGISTER);
+	//sendcmd((unsigned char *)&startupfromapp, ZDO_STARTUP_FROM_APP);
+
+	// register step three
+	memset(&req, 0, sizeof(RegisterFormat_t));
+	req.EndPoint = 3;
+	req.AppProfId = 0x0104;
+	req.AppDeviceId = 3;
+	req.AppNumInClusters = CLUSTERCOUNT - 32;
+	for (i = 0; i < CLUSTERCOUNT - 32; i++){
+		req.AppInClusterList[i] = g_clusters[32+i];
+	}
+	req.AppNumOutClusters = CLUSTERCOUNT - 32;
+	for (i = 0; i < CLUSTERCOUNT - 32; i++){
+		req.AppOutClusterList[i] = g_clusters[16+i];
+	}
+	sendcmd((unsigned char *)&req, AF_REGISTER);
+	//sendcmd((unsigned char *)&startupfromapp, ZDO_STARTUP_FROM_APP);
+
+	return 1;
 }
 
 /*********************************************************************
@@ -1586,61 +1626,6 @@ void appProcess(void * args)
 	nvWrite.Value[0] = 1;
 	status = sysOsalNvWrite(&nvWrite);
 	initDone = 1;
-
-	// register the in and out clusterid. step one
-	RegisterFormat_t req;
-	memset(&req, 0, sizeof(RegisterFormat_t));
-	req.EndPoint = 1;
-	req.AppProfId = 0x0104;
-	req.AppDeviceId = 1;
-	req.AppNumInClusters = 16;
-	int ;
-	for (i = 0; i < 16; i++){
-		req.AppInClusterList[i] = g_clusters[i];
-	}
-	req.AppNumOutClusters = 16;
-	for (i = 0; i < 16; i++){
-		req.AppOutClusterList[i] = g_clusters[i];
-	}
-	sendcmd((unsigned char *)&req, AF_REGISTER);
-
-	StartupFromAppFormat_t startupfromapp;
-	startupfromapp.StartDelay = 0;
-	sendcmd((unsigned char *)&startupfromapp, ZDO_STARTUP_FROM_APP);
-
-	// register step two.
-	memset(&req, 0, sizeof(RegisterFormat_t));
-	req.EndPoint = 2;
-	req.AppProfId = 0x0104;
-	req.AppDeviceId = 2;
-	req.AppNumInClusters = 16;
-	for (i = 0; i < 16; i++){
-		req.AppInClusterList[i] = g_clusters[16+i];
-	}
-	req.AppNumOutClusters = 16;
-	for (i = 0; i < 16; i++){
-		req.AppOutClusterList[i] = g_clusters[16+i];
-	}
-	sendcmd((unsigned char *)&req, AF_REGISTER);
-	sendcmd((unsigned char *)&startupfromapp, ZDO_STARTUP_FROM_APP);
-
-	// register step three
-	memset(&req, 0, sizeof(RegisterFormat_t));
-	req.EndPoint = 3;
-	req.AppProfId = 0x0104;
-	req.AppDeviceId = 3;
-	req.AppNumInClusters = CLUSTERCOUNT - 32;
-	for (i = 0; i < CLUSTERCOUNT - 32; i++){
-		req.AppInClusterList[i] = g_clusters[32+i];
-	}
-	req.AppNumOutClusters = CLUSTERCOUNT - 32;
-	for (i = 0; i < CLUSTERCOUNT - 32; i++){
-		req.AppOutClusterList[i] = g_clusters[16+i];
-	}
-	sendcmd((unsigned char *)&req, AF_REGISTER);
-	sendcmd((unsigned char *)&startupfromapp, ZDO_STARTUP_FROM_APP);
-
-	
 	
 	//	while(1);
 }
