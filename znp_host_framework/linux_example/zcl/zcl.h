@@ -1,5 +1,7 @@
 #ifndef ZCL_H
 #define ZCL_H
+#include "mtAf.h"
+#include "mtSys.h"
 
 /*********************************************************************
  * CONSTANTS
@@ -346,6 +348,31 @@
 
 #define ZCL_CLUSTER_ID_DL( id )       ( (id) == ZCL_CLUSTER_ID_CLOSURES_DOOR_LOCK )
 
+//**************
+
+typedef unsigned char ZStatus_t;
+typedef unsigned char uint8;
+typedef unsigned short uint16;
+
+// Redefined Generic Status Return Values for code backwards compatibility
+#define ZSuccess                    SUCCESS
+#define ZFailure                    FAILURE
+#define ZInvalidParameter           INVALIDPARAMETER
+
+// ZStack status values must start at 0x10, after the generic status values (defined in comdef.h)
+#define ZMemError                   0x10
+#define ZBufferFull                 0x11
+#define ZUnsupportedMode            0x12
+#define ZMacMemError                0x13
+
+#define ZSapiInProgress             0x20
+#define ZSapiTimeout                0x21
+#define ZSapiInit                   0x22
+
+#define ZNotAuthorized              0x7E
+
+#define ZMalformedCmd               0x80
+#define ZUnsupClusterCmd            0x81
 
 // ZCL header - frame control field
 struct zclframecontrol {
@@ -366,9 +393,20 @@ struct zclframehdr{
 
 // ZCL incoming message
 struct zclincomingmsg{
-	struct zclframehdr; 
+	IncomingMsgFormat_t * message;
+	struct zclframehdr zclframehdr; 
 	unsigned char *data;
 	unsigned short datalen;
 };
 
+/*
+ *  Function for Sending a Command
+ */
+ZStatus_t zcl_SendCommand( uint8 srcEP, uint8 dstEp, uint16 dstaddr,
+                                  uint16 clusterID, uint8 cmd, uint8 specific, uint8 direction,
+                                  uint8 disableDefaultRsp, uint16 manuCode, uint8 seqNum,
+                                  uint16 cmdFormatLen, uint8 *cmdFormat );
+
+// process incoming message
+int zcl_proccessincomingmessage(IncomingMsgFormat_t * message); 
 #endif

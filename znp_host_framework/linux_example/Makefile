@@ -2,7 +2,7 @@
 SBU_REV= "0.1"
 
 
-INCLUDE = -I$(PROJ_DIR)../../ -I$(PROJ_DIR)../framework/platform/gnu -I$(PROJ_DIR)../framework/rpc/ -I$(PROJ_DIR)../framework/mt/ -I$(PROJ_DIR)../framework/mt/Af -I$(PROJ_DIR)../framework/mt/Zdo -I$(PROJ_DIR)../framework/mt/Sys -I$(PROJ_DIR)../framework/mt/Sapi
+INCLUDE = -I$(PROJ_DIR)../../ -I$(PROJ_DIR)../framework/platform/gnu -I$(PROJ_DIR)../framework/rpc/ -I$(PROJ_DIR)../framework/mt/ -I$(PROJ_DIR)../framework/mt/Af -I$(PROJ_DIR)../framework/mt/Zdo -I$(PROJ_DIR)../framework/mt/Sys -I$(PROJ_DIR)../framework/mt/Sapi -I$(PROJ_DIR)./zcl -I./
 
 CC= gcc
 #CC=/usr/local/angstrom/arm/bin/arm-angstrom-linux-gnueabi-gcc
@@ -14,8 +14,8 @@ PROJ_DIR=
 
 all: dataSendRcv.bin
 
-dataSendRcv.bin: main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o commands.o 
-	$(CC) main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o commands.o $(LIBS) -o dataSendRcv.bin
+dataSendRcv.bin: main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o commands.o zcl.o zcl_ss.o 
+	$(CC) main.o appinit.o rpc.o mtParser.o mtZdo.o mtSys.o mtAf.o mtSapi.o dbgPrint.o rpcTransport.o queue.o commands.o zcl.o zcl_ss.o $(LIBS) -o dataSendRcv.bin
 
 # rule for file "main.o".
 main.o: main.c
@@ -70,6 +70,13 @@ appinit.o: $(PROJ_DIR)./appinit.h $(PROJ_DIR)./appinit.c ./commands.o
 commands.o: $(PROJ_DIR)./commands.h $(PROJ_DIR)./commands.c
 	$(CC) $(CFLAGS) $(INCLUDE) $(DEFS) $(PROJ_DIR)./commands.c
 
+# rule for file "zcl.o".
+zcl.o: $(PROJ_DIR)./zcl/zcl.h $(PROJ_DIR)./zcl/zcl.c
+	$(CC) $(CFLAGS) $(INCLUDE) $(DEFS) $(PROJ_DIR)./zcl/zcl.c
+
+# rule for file "zcl_ss.o".
+zcl_ss.o: $(PROJ_DIR)./zcl/zcl_ss.h $(PROJ_DIR)./zcl/zcl_ss.c
+	$(CC) $(CFLAGS) $(INCLUDE) $(DEFS) $(PROJ_DIR)./zcl/zcl_ss.c
 
 # rule for cleaning files generated during compilations.
 clean:

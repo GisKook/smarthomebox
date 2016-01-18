@@ -55,6 +55,8 @@
 #include "cluster.h"
 #include "commands.h"
 
+#include "zcl.h"
+
 #define consolePrint printf
 #define consoleClearLn(); printf("%c[2K", 27);
 #define consoleFlush(); fflush(stdout);
@@ -1106,6 +1108,7 @@ static uint8_t mtAfIncomingMsgCb(IncomingMsgFormat_t *msg)
 	{
 		consolePrint("Data[%d]: 0x%02X\n", i, msg->Data[i]);
 	}
+	zcl_proccessincomingmessage(msg);
 
 	return 0;
 }
